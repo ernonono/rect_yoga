@@ -11,7 +11,7 @@ const link = [
   { text: "Riwayat Pendaftaran", path: "/Riwayat" },
 ];
 
-const capitalize = (str) => {
+export const capitalize = (str) => {
   const strArr = str.split(" ");
   const capitalizeArr = strArr.map((str) => {
     return str.charAt(0).toUpperCase() + str.slice(1);

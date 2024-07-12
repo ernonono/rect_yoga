@@ -350,15 +350,15 @@ export default function Register() {
               </div>
               <div className="w-full pl-4">
                 <Button
-                  disabled={mutation.isLoading}
+                  disabled={mutation.isPending}
                   onClick={handleSubmit}
                   className={`${
-                    mutation.isLoading ? "bg-gray-700" : "bg-[#63A375]"
+                    mutation.isPending ? "bg-gray-700" : "bg-[#63A375]"
                   } w-full h-[48px]`}
                   type="submit"
                 >
                   <span className="text-white">
-                    {mutation.isLoading ? "Loading..." : "Register"}
+                    {mutation.isPending ? "Loading..." : "Register"}
                   </span>
                 </Button>
               </div>

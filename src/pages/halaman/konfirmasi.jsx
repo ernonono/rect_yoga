@@ -19,7 +19,8 @@ const formatDate = (date) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-export default function Poli() {
+export default function Konfirmasi() {
+  const user = JSON.parse(localStorage.getItem("user"));
   const { dokter, poli, tanggal, tipe_pembayaran, dokter_id, reset } =
     useRegisterStore((state) => state);
   const [description, setDescription] = useState("");
@@ -29,7 +30,7 @@ export default function Poli() {
     mutationFn: () => {
       const newRegistration = {
         doctor_id: dokter_id,
-        patient_id: 1,
+        patient_id: user.patient.id,
         appointment_date: formatDate(dayjs(tanggal).toISOString()),
         payment_type: tipe_pembayaran,
         description: description,
@@ -71,44 +72,44 @@ export default function Poli() {
             <div className="mt-5">
               <h2 className="text-lg font-semibold mb-2">Detail Layanan</h2>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="font-medium">{dokter}</p>
                 <p className="text-gray-600">Dokter Pemeriksa</p>
+                <p className="font-medium">{dokter}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="font-medium">{poli}</p>
                 <p className="text-gray-600">Tipe Layanan</p>
+                <p className="font-medium">{poli}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
+                <p className="text-gray-600">Waktu</p>
                 <p className="font-medium">
-                  {dayjs(tanggal).format("DD MMMM YYYY")}
+                  {dayjs(tanggal).format("DD MMMM YYYY | HH:mm")}
                 </p>
-                <p className="text-gray-600">17 Maret 2024, 10.00 - 12.00</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="font-medium">{tipe_pembayaran}</p>
                 <p className="text-gray-600">Tipe Pembayaran</p>
+                <p className="font-medium">{tipe_pembayaran}</p>
               </div>
             </div>
             <div className="mt-5">
               <h2 className="text-lg font-semibold mb-2">Detail Pasien</h2>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="font-medium">Email</p>
-                <p className="text-gray-600">contohemail@gmail.com</p>
+                <p className="text-gray-600">Email</p>
+                <p className="font-medium">{user?.email || ""}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="font-medium">Nama Pasien</p>
-                <p className="text-gray-600">Yoga Ernowibowo</p>
+                <p className="text-gray-600">Nama Pasien</p>
+                <p className="font-medium">{user?.name || ""}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="font-medium">Jenis Kelamin</p>
-                <p className="text-gray-600">Laki Laki</p>
+                <p className="text-gray-600">Jenis Kelamin</p>
+                <p className="font-medium">{user?.patient?.gender || ""}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="font-medium">Alamat</p>
-                <p className="text-gray-600">Ngoresan, Surakarta</p>
+                <p className="text-gray-600">Alamat</p>
+                <p className="font-medium">{user?.patient?.address || ""}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="font-medium">Keterangan</p>
+                <p className="text-gray-600">Keterangan</p>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}

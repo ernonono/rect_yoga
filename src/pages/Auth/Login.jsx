@@ -38,6 +38,16 @@ export default function Login() {
       });
 
       setTimeout(() => {
+        if (res.data?.user?.role === "admin") {
+          navigate("/admin");
+          return;
+        }
+
+        if (res.data?.user?.role === "doctor") {
+          navigate("/doctor");
+          return;
+        }
+
         navigate("/beranda");
       }, 1500);
     },
@@ -147,12 +157,12 @@ export default function Login() {
               </div>
               <div className="w-full pl-4">
                 <Button
-                  disabled={mutation.isLoading}
+                  disabled={mutation.isPending}
                   className="bg-[#63A375] w-full h-[48px]"
                   onClick={handleLoginClick}
                 >
                   <span className="text-white">
-                    {mutation.isLoading ? "Loading..." : "Login"}
+                    {mutation.isPending ? "Loading..." : "Login"}
                   </span>
                 </Button>
               </div>
