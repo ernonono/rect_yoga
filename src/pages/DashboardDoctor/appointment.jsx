@@ -245,14 +245,19 @@ function DoctorAppointments() {
 
   const deleteRM = useMutation({
     mutationFn: (id) => instance.delete(`/medical-records/${id}`),
-    onSuccess: (data) => {
-      toast.success("Rekam Medis Berhasil Dihapus");
+    onSuccess: () => {
+      toast.success("Rekam Medis Berhasil Dihapus", {
+        position: "top-left",
+      });
       refetch();
     },
 
     onError: (error) => {
       toast.error(
         error?.response?.data?.message || "Gagal menghapus rekam medis",
+        {
+          position: "top-left",
+        },
       );
     },
   });

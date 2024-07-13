@@ -46,13 +46,18 @@ function EditRekamMedis() {
     mutationFn: (form) =>
       instance.put(`/medical-records/${params.get("identifier")}`, form),
     onSuccess: () => {
-      toast.success("Rekam Medis Berhasil Diubah");
+      toast.success("Rekam Medis Berhasil Diubah", {
+        position: "top-left",
+      });
       navigate(`/doctor/appointments?identifier=${data.registration_id}`);
     },
 
     onError: (error) => {
       toast.error(
         error?.response?.data?.message || "Gagal menambahkan rekam medis",
+        {
+          position: "top-left",
+        },
       );
     },
   });
