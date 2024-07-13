@@ -93,7 +93,7 @@ const CardData = ({ data, onClick, onRM }) => (
         }
       }}
     >
-      Rekam Medis
+      Rekam Medis ({data?.medical_records?.length || 0})
     </Button>
   </div>
 );

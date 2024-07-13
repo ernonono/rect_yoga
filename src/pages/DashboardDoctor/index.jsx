@@ -13,8 +13,10 @@ import { CalendarOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 
 function DashboardDoctor() {
+  const navigate = useNavigate();
   const { data, isLoading } = useQuery({
     queryKey: ["doctor-registration"],
     queryFn: async () => {
@@ -98,7 +100,14 @@ function DashboardDoctor() {
             content={<Content data={item} />}
             placement="topLeft"
           >
-            <div className="bg-primary px-2 text-white rounded-md">
+            <div
+              onClick={() => {
+                if (item.status === "Belum Selesai") return;
+
+                navigate(`/doctor/appointments?identifier=${item.id}`);
+              }}
+              className="bg-primary px-2 text-white rounded-md"
+            >
               <div className="font-bold">
                 {dayjs(item?.appointment_date).format("HH:mm")}
               </div>
