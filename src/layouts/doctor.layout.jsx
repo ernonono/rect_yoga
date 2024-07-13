@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UploadOutlined,
+  AppstoreOutlined,
   UserOutlined,
-  VideoCameraOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -68,27 +68,28 @@ const DoctorLayout = () => {
   const menuItems = [
     {
       key: "/doctor",
-      icon: <UserOutlined />,
+      icon: <AppstoreOutlined />,
       label: "Dashboard",
       onClick: () => navigate("/doctor"),
     },
     {
       key: "/doctor/appointments",
-      icon: <VideoCameraOutlined />,
+      icon: <CalendarOutlined />,
       label: "Appointments",
       onClick: () => navigate("/doctor/appointments"),
     },
     {
-      key: "/doctor/patients",
-      icon: <UploadOutlined />,
-      label: "Patients",
-      onClick: () => navigate("/doctor/patients"),
+      key: "/doctor/profile",
+      icon: <UserOutlined />,
+      label: "Profile",
+      onClick: () => navigate("/doctor/profile"),
     },
   ];
 
   useEffect(() => {
     const pageName = currentPath.split("/")[currentPath.split("/").length - 1];
-    document.title = capitalize(pageName || "Dashboard");
+    const parsedPageName = pageName.split("-").join(" ");
+    document.title = capitalize(parsedPageName || "Dashboard");
   }, [currentPath]);
 
   return (

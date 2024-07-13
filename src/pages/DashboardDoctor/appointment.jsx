@@ -1,9 +1,29 @@
-import { useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Skeleton, Typography } from "antd";
-import React from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Avatar,
+  Button,
+  Card,
+  Descriptions,
+  Drawer,
+  Input,
+  Modal,
+  Skeleton,
+  Timeline,
+  Tooltip,
+  Typography,
+} from "antd";
+import React, { useEffect, useState } from "react";
 import instance from "../../utils/axios";
-import { UserOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  FileTextOutlined,
+  FileAddOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const abbreviate = (name) => {
   const firstName = name.split(" ")[0];
@@ -27,7 +47,7 @@ const SkeletonCards = () => (
   </div>
 );
 
-const CardData = ({ data }) => (
+const CardData = ({ data, onClick, onRM }) => (
   <div className="bg-white flex flex-col justify-between min-h-[200px] p-5 rounded-lg shadow-md">
     <div className="flex justify-between">
       <div className="flex flex-col justify-center items-center">
@@ -47,20 +67,230 @@ const CardData = ({ data }) => (
       </div>
     </div>
 
-    <Button block className="mt-5" type="primary">
-      + Tambah RM
+    <Button
+      icon={<FileAddOutlined />}
+      onClick={() => onClick(data.id)}
+      block
+      className="mt-5"
+      type="primary"
+    >
+      Tambah RM
+    </Button>
+
+    <Button
+      block
+      icon={<FileTextOutlined />}
+      className={`mt-2 ${data?.medical_records?.length === 0 ? "bg-gray-600/80" : "bg-blue-600 hover:bg-blue-400"} text-white`}
+      type="primary"
+      color="info"
+      onClick={() => {
+        if (data?.medical_records?.length === 0) {
+          toast.warning(
+            "Tidak ada data rekam medis untuk pasien di tanggal ini",
+          );
+        } else {
+          onRM(data.id);
+        }
+      }}
+    >
+      Rekam Medis
     </Button>
   </div>
 );
 
+const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
+  const [open, setOpen] = useState([data?.rm?.map(() => false)]);
+  const items = data?.rm?.map((item, idx) => ({
+    children: (
+      <Card
+        size="small"
+        title={
+          <div className="w-full flex justify-between items-center">
+            <span>{dayjs(item.date).format("DD MMMM YYYY")}</span>
+
+            <div className="flex gap-2">
+              <Tooltip title="Edit Rekam Medis">
+                <Button
+                  icon={<EditOutlined />}
+                  onClick={() => onEdit(item.id)}
+                  type="link"
+                  size="large"
+                />
+              </Tooltip>
+
+              <Tooltip title="Hapus Rekam Medis">
+                <Button
+                  danger
+                  loading={deleteLoading}
+                  onClick={() => onDelete(item.id)}
+                  icon={<DeleteOutlined />}
+                  type="link"
+                  size="large"
+                />
+              </Tooltip>
+            </div>
+          </div>
+        }
+        className="mb-3"
+      >
+        <div className="flex gap-2 mb-2">
+          <span className="font-semibold min-w-[60px]">Gejala</span>
+
+          <div className="flex gap-2">
+            <span>:</span>
+
+            <ul>
+              {item.symptomps.split(",").map((item, index) => (
+                <li key={index}>- {item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mb-2">
+          <span className="font-semibold min-w-[60px]">Diagnosa</span>
+          <div className="flex gap-2">
+            <span>:</span>
+            <Typography.Text>{item.diagnosis}</Typography.Text>
+          </div>
+        </div>
+
+        <Button
+          className="mt-2"
+          icon={<FileTextOutlined />}
+          type="primary"
+          onClick={() => {
+            setOpen((prev) => {
+              const newOpen = [...prev];
+              newOpen[idx] = true;
+              return newOpen;
+            });
+          }}
+          size="small"
+        >
+          Resep Obat
+        </Button>
+
+        <Modal
+          width={800}
+          okText="Tutup"
+          cancelButtonProps={{ style: { display: "none" } }}
+          open={open[idx]}
+          onOk={() => {
+            setOpen((prev) => {
+              const newOpen = [...prev];
+              newOpen[idx] = false;
+              return newOpen;
+            });
+          }}
+          onCancel={() => {
+            setOpen((prev) => {
+              const newOpen = [...prev];
+              newOpen[idx] = false;
+              return newOpen;
+            });
+          }}
+          title="Resep Obat"
+        >
+          <Input.TextArea
+            value={item.prescription}
+            rows={10}
+            readOnly
+            className="w-full"
+          />
+        </Modal>
+      </Card>
+    ),
+  }));
+
+  const descriptionItems = [
+    {
+      label: "Nama Pasien",
+      children: data?.registration.patient.name,
+    },
+    {
+      label: "Tanggal Check Up",
+      children: dayjs(data?.registration?.appointment_date).format(
+        "dddd, D MMMM YYYY",
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <Descriptions
+        items={descriptionItems}
+        className="mb-4"
+        column={1}
+        size="small"
+      />
+
+      <Timeline reverse items={items} />
+    </>
+  );
+};
+
 function DoctorAppointments() {
-  const { data, isLoading } = useQuery({
+  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const [registrationId, setRegistrationId] = useState(null);
+  const [dataRM, setDataRM] = useState(null);
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["doctor-appointments"],
     queryFn: async () => {
       const { data } = await instance.get("/registrations-doctor");
       return data;
     },
   });
+
+  const deleteRM = useMutation({
+    mutationFn: (id) => instance.delete(`/medical-records/${id}`),
+    onSuccess: (data) => {
+      toast.success("Rekam Medis Berhasil Dihapus");
+      refetch();
+    },
+
+    onError: (error) => {
+      toast.error(
+        error?.response?.data?.message || "Gagal menghapus rekam medis",
+      );
+    },
+  });
+
+  const handleAddRM = (id) => {
+    navigate(`/doctor/medical-record/add-rekam-medis?registration_id=${id}`);
+  };
+
+  const handleViewRM = (id) => {
+    setParams({ identifier: id });
+  };
+
+  const handleEditRM = (id) => {
+    navigate(`/doctor/medical-record/edit-rekam-medis?identifier=${id}`);
+  };
+
+  useEffect(() => {
+    if (params.get("identifier")) {
+      setRegistrationId(params.get("identifier"));
+    } else {
+      setRegistrationId(null);
+      setDataRM(null);
+    }
+  }, [params]);
+
+  useEffect(() => {
+    if (registrationId && data) {
+      const regis = data.find(
+        (item) => item.id === parseInt(registrationId || "0"),
+      );
+      const rm = regis?.medical_records || [];
+
+      setDataRM({
+        registration: regis,
+        rm,
+      });
+    }
+  }, [registrationId, data]);
 
   return (
     <div>
@@ -73,10 +303,38 @@ function DoctorAppointments() {
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {data?.map((item) => (
-            <CardData key={item.id} data={item} />
+            <CardData
+              onClick={handleAddRM}
+              key={item.id}
+              data={item}
+              onRM={handleViewRM}
+            />
           ))}
         </div>
       )}
+
+      <Drawer
+        title="Riwayat Rekam Medis"
+        placement="right"
+        width={500}
+        closable={false}
+        onClose={() => setParams({})}
+        open={!!registrationId}
+      >
+        {dataRM?.length === 0 ? (
+          <p>
+            No medical records found for this patient. Please add medical
+            records.
+          </p>
+        ) : (
+          <MedicalRecordTimeline
+            data={dataRM}
+            deleteLoading={deleteRM.isPending}
+            onDelete={deleteRM.mutate}
+            onEdit={handleEditRM}
+          />
+        )}
+      </Drawer>
     </div>
   );
 }
