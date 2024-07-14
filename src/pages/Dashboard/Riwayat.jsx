@@ -1,18 +1,169 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Banner from "../../components/banner2";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import instance from "../../utils/axios";
 import dayjs from "dayjs";
 
 import "dayjs/locale/id";
+import {
+  Button,
+  Card,
+  Descriptions,
+  Drawer,
+  Input,
+  Modal,
+  Tag,
+  Timeline,
+  Typography,
+} from "antd";
+
+import { FileTextOutlined } from "@ant-design/icons";
 
 dayjs.locale("id");
 
+const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
+  const [open, setOpen] = useState([data?.rm?.map(() => false)]);
+  const items = data?.rm?.map((item, idx) => ({
+    children: (
+      <Card
+        size="small"
+        title={
+          <div className="w-full flex justify-between items-center">
+            <span>{dayjs(item.date).format("DD MMMM YYYY")}</span>
+          </div>
+        }
+        className="mb-3"
+      >
+        <div className="flex gap-2 mb-2">
+          <span className="font-semibold min-w-[60px]">Gejala</span>
+
+          <div className="flex gap-2">
+            <span>:</span>
+
+            <ul>
+              {item.symptomps.split(",").map((item, index) => (
+                <li key={index}>- {item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mb-2">
+          <span className="font-semibold min-w-[60px]">Diagnosa</span>
+          <div className="flex gap-2">
+            <span>:</span>
+            <Typography.Text>{item.diagnosis}</Typography.Text>
+          </div>
+        </div>
+
+        <Button
+          className="mt-2"
+          icon={<FileTextOutlined />}
+          type="primary"
+          onClick={() => {
+            setOpen((prev) => {
+              const newOpen = [...prev];
+              newOpen[idx] = true;
+              return newOpen;
+            });
+          }}
+          size="small"
+        >
+          Resep Obat
+        </Button>
+
+        <Modal
+          width={800}
+          okText="Tutup"
+          cancelButtonProps={{ style: { display: "none" } }}
+          open={open[idx]}
+          onOk={() => {
+            setOpen((prev) => {
+              const newOpen = [...prev];
+              newOpen[idx] = false;
+              return newOpen;
+            });
+          }}
+          onCancel={() => {
+            setOpen((prev) => {
+              const newOpen = [...prev];
+              newOpen[idx] = false;
+              return newOpen;
+            });
+          }}
+          title="Resep Obat"
+        >
+          <Input.TextArea
+            value={item.prescription}
+            rows={10}
+            readOnly
+            className="w-full"
+          />
+        </Modal>
+      </Card>
+    ),
+  }));
+
+  const descriptionItems = [
+    {
+      label: "Nama Pasien",
+      children: data?.registration?.patient?.name,
+    },
+    {
+      label: "Tanggal Check Up",
+      children: dayjs(data?.registration?.appointment_date).format(
+        "dddd, D MMMM YYYY",
+      ),
+    },
+    {
+      label: "Poli",
+      children: data?.registration?.doctor?.poli?.name,
+    },
+    {
+      label: "Dokter",
+      children: data?.registration?.doctor?.name,
+    },
+    {
+      label: "Status",
+      children: (
+        <Tag
+          color={
+            data?.registration?.status === "Belum Selesai" ? "red" : "green"
+          }
+        >
+          {data?.registration?.status}
+        </Tag>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <Descriptions
+        items={descriptionItems}
+        className="mb-4"
+        column={1}
+        bordered
+        size="small"
+      />
+
+      <Timeline reverse items={items} />
+    </>
+  );
+};
+
 export default function Riwayat() {
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const [registrationId, setRegistrationId] = useState(null);
+  const [dataRM, setDataRM] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
+
+  const handleViewRM = (id) => {
+    setParams({ identifier: id });
+  };
 
   const fetchRegistration = async () => {
     try {
@@ -29,9 +180,28 @@ export default function Riwayat() {
     fetchRegistration();
   }, []);
 
-  const handleRiwayatClick = () => {
-    navigate("/beranda");
-  };
+  useEffect(() => {
+    if (params.get("identifier")) {
+      setRegistrationId(params.get("identifier"));
+    } else {
+      setRegistrationId(null);
+      setDataRM(null);
+    }
+  }, [params]);
+
+  useEffect(() => {
+    if (registrationId && data) {
+      const regis = data.find(
+        (item) => item.id === parseInt(registrationId || "0"),
+      );
+      const rm = regis?.medical_records || [];
+
+      setDataRM({
+        registration: regis,
+        rm,
+      });
+    }
+  }, [registrationId, data]);
 
   return (
     <div className="relative">
@@ -61,13 +231,34 @@ export default function Riwayat() {
                     <p className="text-sm">{item?.status}</p>
                   </div>
                 </div>
-                <div className="bg-white p-4 w-[600px]  border-gray-200 shadow-md">
-                  <a href="#" className="text-[#63A375]  ">
-                    Lihat rekam medis
-                  </a>
+                <div
+                  onClick={() => handleViewRM(item.id)}
+                  className="bg-white p-4 w-[600px] cursor-pointer border-gray-200 shadow-md"
+                >
+                  <span className="text-[#63A375]  ">
+                    Lihat rekam medis ({item?.medical_records?.length || 0})
+                  </span>
                 </div>
               </div>
             ))}
+
+            <Drawer
+              title="Riwayat Rekam Medis"
+              placement="right"
+              width={500}
+              closable={false}
+              onClose={() => setParams({})}
+              open={!!registrationId}
+            >
+              {dataRM?.rm?.length === 0 ? (
+                <p>
+                  No medical records found. Please wait for your medical
+                  records.
+                </p>
+              ) : (
+                <MedicalRecordTimeline data={dataRM} />
+              )}
+            </Drawer>
           </div>
         )}
       </div>
