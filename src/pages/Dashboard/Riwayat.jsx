@@ -250,13 +250,13 @@ export default function Riwayat() {
               onClose={() => setParams({})}
               open={!!registrationId}
             >
-              {dataRM?.rm?.length === 0 ? (
+              {dataRM?.rm?.length > 0 ? (
+                <MedicalRecordTimeline data={dataRM} />
+              ) : (
                 <p>
                   No medical records found. Please wait for your medical
                   records.
                 </p>
-              ) : (
-                <MedicalRecordTimeline data={dataRM} />
               )}
             </Drawer>
           </div>
