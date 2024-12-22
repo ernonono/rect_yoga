@@ -15,12 +15,12 @@ import instance from "../../utils/axios";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
-function DashboardDoctor() {
+function DoctorSchedule() {
   const navigate = useNavigate();
   const { data, isLoading } = useQuery({
-    queryKey: ["doctor-registration"],
+    queryKey: ["registrations"],
     queryFn: async () => {
-      const { data } = await instance.get("/registrations-doctor");
+      const { data } = await instance.get("/registrations");
       return data;
     },
   });
@@ -128,7 +128,7 @@ function DashboardDoctor() {
   return (
     <div>
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
-        DASHBOARD
+        JADWAL DOKTOR
       </Typography.Title>
 
       <div className="w-full flex justify-start items-center gap-7 mb-6">
@@ -149,4 +149,4 @@ function DashboardDoctor() {
   );
 }
 
-export default DashboardDoctor;
+export default DoctorSchedule;

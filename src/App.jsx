@@ -4,6 +4,7 @@ import "react-calendar/dist/Calendar.css";
 import UserRoutes from "./routes/user.routes";
 import AuthRoutes from "./routes/auth.routes";
 import DoctorRoutes from "./routes/doctor.routes";
+import AdminRoutes from "./routes/admin.routes";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <AuthRoutes />
       <UserRoutes />
       <DoctorRoutes />
+      <AdminRoutes />
     </BrowserRouter>
   );
 }

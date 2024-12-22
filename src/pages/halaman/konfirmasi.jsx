@@ -33,7 +33,7 @@ export default function Konfirmasi() {
         patient_id: user.patient.id,
         appointment_date: formatDate(dayjs(tanggal).toISOString()),
         payment_type: tipe_pembayaran,
-        description: description,
+        description: description || "-",
         is_canceled: 0,
         registry_date: formatDate(dayjs().toISOString()),
         status: "Belum Selesai",

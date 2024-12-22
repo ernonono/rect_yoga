@@ -5,6 +5,7 @@ import {
   AppstoreOutlined,
   UserOutlined,
   CalendarOutlined,
+  SettingOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Layout, Menu, theme } from "antd";
@@ -14,10 +15,12 @@ import { useMutation } from "@tanstack/react-query";
 import instance from "../utils/axios";
 import { toast } from "react-toastify";
 import { UserCircleIcon } from "@heroicons/react/16/solid";
-import DoctorGuard from "../components/DoctorGuard";
+import AdminGuard from "../components/AdminGuard";
 const { Header, Sider, Content } = Layout;
 
-const DoctorLayout = () => {
+const numStrArr = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+
+const AdminLayout = () => {
   const toastId = useRef(null);
   const user = JSON.parse(localStorage.getItem("user"));
   const currentPath = window.location.pathname;
@@ -68,22 +71,72 @@ const DoctorLayout = () => {
 
   const menuItems = [
     {
-      key: "/doctor",
+      key: "/admin",
       icon: <AppstoreOutlined />,
       label: "Dashboard",
-      onClick: () => navigate("/doctor"),
+      onClick: () => navigate("/admin"),
     },
     {
-      key: "/doctor/appointments",
+      key: "/admin/appointments",
       icon: <CalendarOutlined />,
       label: "Jadwal Janji",
-      onClick: () => navigate("/doctor/appointments"),
+      onClick: () => navigate("/admin/appointments"),
     },
     {
-      key: "/doctor/profile",
+      key: "/admin/doctors",
       icon: <UserOutlined />,
-      label: "Profil",
-      onClick: () => navigate("/doctor/profile"),
+      label: "Doktor",
+      children: [
+        {
+          key: "/admin/doctors",
+          label: "Semua Doktor",
+          onClick: () => navigate("/admin/doctors"),
+        },
+        {
+          key: "/admin/doctors/add",
+          label: "Tambah Doktor",
+          onClick: () => navigate("/admin/doctors/add"),
+        },
+      ],
+    },
+    {
+      key: "/admin/patients",
+      icon: <UserOutlined />,
+      label: "Pasien",
+      children: [
+        {
+          key: "/admin/patients",
+          label: "Semua Pasien",
+          onClick: () => navigate("/admin/patients"),
+        },
+        {
+          key: "/admin/patients/add",
+          label: "Tambah Pasien",
+          onClick: () => navigate("/admin/patients/add"),
+        },
+        {
+          key: "/admin/patients/medical-records",
+          label: "Rekam Medis",
+          onClick: () => navigate("/admin/patients/medical-records"),
+        },
+      ],
+    },
+    {
+      key: "/admin/other",
+      icon: <SettingOutlined />,
+      label: "Lainnya",
+      children: [
+        {
+          key: "/admin/other/schedule",
+          label: "Jadwal Doktor",
+          onClick: () => navigate("/admin/other/schedule"),
+        },
+        {
+          key: "/admin/other/healtcare",
+          label: "Pelayanan Kesehatan",
+          onClick: () => navigate("/admin/other/healtcare"),
+        },
+      ],
     },
     {
       key: "logout",
@@ -96,17 +149,23 @@ const DoctorLayout = () => {
   useEffect(() => {
     const pageName = currentPath.split("/")[currentPath.split("/").length - 1];
     const parsedPageName = pageName.split("-").join(" ");
-    document.title = capitalize(parsedPageName || "Dashboard");
+
+    let title = "FASYANKES";
+
+    if (numStrArr.includes(pageName[0])) {
+      title = `Detail`;
+    } else {
+      title = capitalize(parsedPageName || "Dashboard");
+    }
+
+    document.title = title;
   }, [currentPath]);
 
   return (
-    <DoctorGuard>
+    <AdminGuard>
       <Layout className="min-h-screen">
         <Sider trigger={null} collapsible collapsed={collapsed}>
-          <div
-            onClick={() => setShowLogout(!showLogout)}
-            className="flex cursor-pointer relative gap-3 py-5 items-center justify-center w-full "
-          >
+          <div className="flex cursor-pointer relative gap-3 py-5 items-center justify-center w-full ">
             <Avatar
               size={45}
               icon={<UserCircleIcon className="text-[#63A375]" />}
@@ -167,7 +226,7 @@ const DoctorLayout = () => {
           </Content>
         </Layout>
       </Layout>
-    </DoctorGuard>
+    </AdminGuard>
   );
 };
-export default DoctorLayout;
+export default AdminLayout;
