@@ -132,9 +132,9 @@ const AdminLayout = () => {
           onClick: () => navigate("/admin/other/schedule"),
         },
         {
-          key: "/admin/other/healtcare",
+          key: "/admin/other/healthcare",
           label: "Pelayanan Kesehatan",
-          onClick: () => navigate("/admin/other/healtcare"),
+          onClick: () => navigate("/admin/other/healthcare"),
         },
       ],
     },
