@@ -65,7 +65,7 @@ export default function Navbar() {
 
   return (
     <div className="flex justify-between h-[100px]">
-      <div className="flex flex-grow items-center justify-center">
+      <div className="flex flex-grow items-center justify-start px-6">
         {link.map((link, index) => (
           <a
             key={index}

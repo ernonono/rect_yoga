@@ -9,7 +9,7 @@ export default function Banner() {
     navigate("/poli");
   };
   return (
-    <div className="relative w-screen h-[595px]">
+    <div className="relative w-full h-[595px]">
       <img src={Background} style={{ width: "100%", height: "750px" }} />
       <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
         <div className="w-1/2">

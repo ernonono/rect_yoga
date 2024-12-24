@@ -7,6 +7,7 @@ import {
   CalendarOutlined,
   SettingOutlined,
   LogoutOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -99,6 +100,7 @@ const AdminLayout = () => {
         },
       ],
     },
+
     {
       key: "/admin/patients",
       icon: <UserOutlined />,
@@ -118,6 +120,23 @@ const AdminLayout = () => {
           key: "/admin/patients/medical-records",
           label: "Rekam Medis",
           onClick: () => navigate("/admin/patients/medical-records"),
+        },
+      ],
+    },
+    {
+      key: "/admin/poli",
+      icon: <ShopOutlined />,
+      label: "Poli",
+      children: [
+        {
+          key: "/admin/poli",
+          label: "Semua Poli",
+          onClick: () => navigate("/admin/poli"),
+        },
+        {
+          key: "/admin/poli/add",
+          label: "Tambah Poli",
+          onClick: () => navigate("/admin/poli/add"),
         },
       ],
     },

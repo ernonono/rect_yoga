@@ -13,6 +13,8 @@ import Healthcare from "../pages/DashboardAdmin/healtcare";
 import EditDoctor from "../pages/DashboardAdmin/edit_doctor";
 import EditPatient from "../pages/DashboardAdmin/edit_patient";
 import DetailRMPatient from "../pages/DashboardAdmin/detail_rm_patient";
+import Poli from "../pages/DashboardAdmin/poli";
+import AddPoli from "../pages/DashboardAdmin/add_poli";
 
 export default function AdminRoutes({}) {
   return (
@@ -20,11 +22,9 @@ export default function AdminRoutes({}) {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<DashboardAdmin />} />
         <Route path="appointments" element={<AppointmentDoctor />} />
-
         <Route path="doctors" element={<DoctorList />} />
         <Route path="doctors/add" element={<AddDoctor />} />
         <Route path="doctors/:id/edit" element={<EditDoctor />} />
-
         <Route path="patients" element={<PatientList />} />
         <Route path="patients/add" element={<AddPatient />} />
         <Route path="patients/:id/edit" element={<EditPatient />} />
@@ -36,7 +36,9 @@ export default function AdminRoutes({}) {
           path="patients/medical-records/:id"
           element={<DetailRMPatient />}
         />
-
+        // Poli
+        <Route path="poli" element={<Poli />} />
+        <Route path="poli/add" element={<AddPoli />} />
         <Route path="other/schedule" element={<DoctorSchedule />} />
         <Route path="other/healthcare" element={<Healthcare />} />
       </Route>

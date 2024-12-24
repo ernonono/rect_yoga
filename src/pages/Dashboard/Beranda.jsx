@@ -1,32 +1,52 @@
 import React from "react";
 import Navbar from "../../components/Navbar";
 import Banner from "../../components/banner3";
-import tatacara from "../../assets/video.mp4";
+import { useQuery } from "@tanstack/react-query";
+import instance from "../../utils/axios";
+import { Card } from "antd";
+
+const VideoItem = ({ video }) => {
+  const videoUrl = `http://localhost:8000/healthcare_video/${video.video}`;
+  return (
+    <Card title={video.title} className="cursor-pointer" bordered={false}>
+      <div className="flex gap-6">
+        <video className="w-1/2 rounded-md" controls src={videoUrl} />
+
+        <div className="w-1/2">
+          <p className="text-left">{video.description}</p>
+        </div>
+      </div>
+    </Card>
+  );
+};
 
 export default function Beranda() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["healthcare-list"],
+    queryFn: async () => {
+      const { data } = await instance.get("healthcares");
+
+      return data;
+    },
+  });
+
   return (
     <div className="relative">
       <Navbar />
       <Banner />
       <div className="absolute mt-60 left-0 w-full text-center">
-        <div className="font-black text-[#ADCEB7] text-[96px]">Tata Cara</div>
-        <div className="flex flex-col justify-center">
-        <div className="flex flex-row px-28 mt-24">
-            <div className="flex flex-col items-center mx-10">
-            <div className="bg-white border-gray-200 shadow-md p-4 h-[356px] w-[556px] rounded-[50px] flex items-center justify-center">
-                <video controls autostart autoPlay src={tatacara.mp4} style={{ width: "70%", height: "70%" }} />
-            </div>
-            </div>
-                <div className="md:w-1/2 md:pl-8 text-left mt-28">
-                <h2 className="text-3xl font-bold mb-4">Tata cara Pendaftaran Online RS Lorem</h2>
-                <p className="mb-4">
-                Disini terdapat video untuk memberi tahu tata cara mendaftar pada sistem ini. 
-                Silahkan menyimak video dengan baik jika belum paham dengan cara untuk mendaftar pada sistem ini.
-                </p>
-                </div>
+        <div className="font-black text-[#ADCEB7] text-[96px]">
+          Layanan Kesehatan
         </div>
+
+        <div className="grid grid-cols-1 gap-4 p-4">
+          {isLoading && <div>Loading...</div>}
+          {error && <div>Error...</div>}
+          {data?.map((video) => (
+            <VideoItem key={video.id} video={video} />
+          ))}
         </div>
-        </div>
+      </div>
     </div>
   );
 }
