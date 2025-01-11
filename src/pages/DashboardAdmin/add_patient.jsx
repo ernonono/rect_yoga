@@ -183,17 +183,32 @@ export default function AddPatient() {
             </Dragger>
           </Form.Item>
 
-          <Form.Item label="Alamat" name="address" className="md:w-7/12 w-full">
+          <Form.Item
+            label="Alamat"
+            rules={required}
+            name="address"
+            className="md:w-7/12 w-full"
+          >
             <Input.TextArea />
           </Form.Item>
           <Form.Item
+            rules={required}
             label="Nomor Telepon"
             name="phone"
             className="md:w-7/12 w-full"
           >
             <Input
               onKeyDown={(event) => {
-                if (!/[0-9]/.test(event.key)) {
+                // backspace, delete, arrow keys, tab, enter, etc
+                if (
+                  !/[0-9]/.test(event.key) &&
+                  event.key !== "Backspace" &&
+                  event.key !== "Delete" &&
+                  event.key !== "ArrowLeft" &&
+                  event.key !== "ArrowRight" &&
+                  event.key !== "Tab" &&
+                  event.key !== "Enter"
+                ) {
                   event.preventDefault();
                 }
               }}
@@ -208,7 +223,16 @@ export default function AddPatient() {
           >
             <Input
               onKeyDown={(event) => {
-                if (!/[0-9]/.test(event.key)) {
+                // backspace, delete, arrow keys, tab, enter, etc
+                if (
+                  !/[0-9]/.test(event.key) &&
+                  event.key !== "Backspace" &&
+                  event.key !== "Delete" &&
+                  event.key !== "ArrowLeft" &&
+                  event.key !== "ArrowRight" &&
+                  event.key !== "Tab" &&
+                  event.key !== "Enter"
+                ) {
                   event.preventDefault();
                 }
               }}
@@ -222,7 +246,16 @@ export default function AddPatient() {
           >
             <Input
               onKeyDown={(event) => {
-                if (!/[0-9]/.test(event.key)) {
+                // backspace, delete, arrow keys, tab, enter, etc
+                if (
+                  !/[0-9]/.test(event.key) &&
+                  event.key !== "Backspace" &&
+                  event.key !== "Delete" &&
+                  event.key !== "ArrowLeft" &&
+                  event.key !== "ArrowRight" &&
+                  event.key !== "Tab" &&
+                  event.key !== "Enter"
+                ) {
                   event.preventDefault();
                 }
               }}
@@ -236,7 +269,12 @@ export default function AddPatient() {
               <Select.Option value="janda">Janda</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item label="Agama" name="religion" className="md:w-7/12 w-full">
+          <Form.Item
+            label="Agama"
+            rules={required}
+            name="religion"
+            className="md:w-7/12 w-full"
+          >
             <Select>
               <Select.Option value="islam">Islam</Select.Option>
               <Select.Option value="kristen">Kristen</Select.Option>
@@ -262,7 +300,16 @@ export default function AddPatient() {
           </Form.Item>
           <Form.Item
             onKeyDown={(event) => {
-              if (!/[0-9]/.test(event.key)) {
+              // backspace, delete, arrow keys, tab, enter, etc
+              if (
+                !/[0-9]/.test(event.key) &&
+                event.key !== "Backspace" &&
+                event.key !== "Delete" &&
+                event.key !== "ArrowLeft" &&
+                event.key !== "ArrowRight" &&
+                event.key !== "Tab" &&
+                event.key !== "Enter"
+              ) {
                 event.preventDefault();
               }
             }}
@@ -274,7 +321,16 @@ export default function AddPatient() {
           </Form.Item>
           <Form.Item
             onKeyDown={(event) => {
-              if (!/[0-9]/.test(event.key)) {
+              // backspace, delete, arrow keys, tab, enter, etc
+              if (
+                !/[0-9]/.test(event.key) &&
+                event.key !== "Backspace" &&
+                event.key !== "Delete" &&
+                event.key !== "ArrowLeft" &&
+                event.key !== "ArrowRight" &&
+                event.key !== "Tab" &&
+                event.key !== "Enter"
+              ) {
                 event.preventDefault();
               }
             }}

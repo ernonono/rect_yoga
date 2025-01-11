@@ -104,24 +104,24 @@ function DoctorCard({ doctor, onClick, refetch }) {
         </div>
 
         <div className="flex gap-5">
-          <div className="relative group">
-            <EditOutlined
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/admin/doctors/${doctor.id}/edit`);
-              }}
-              className="text-primary  text-lg cursor-pointer relative z-10"
-            />
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/admin/doctors/${doctor.id}/edit`);
+            }}
+            className="relative group"
+          >
+            <EditOutlined className="text-primary  text-lg cursor-pointer relative z-10" />
             <i className="absolute top-1/2 left-1/2 transform w-7 h-7 transition-all duration-100 rounded-full group-hover:bg-primary/20 z-0 -translate-x-1/2 -translate-y-1/2" />
           </div>
-          <div className="relative group">
-            <DeleteOutlined
-              onClick={(e) => {
-                e.stopPropagation();
-                mutation.mutate();
-              }}
-              className="text-red-500 text-lg cursor-pointer"
-            />
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              mutation.mutate();
+            }}
+            className="relative group"
+          >
+            <DeleteOutlined className="text-red-500 text-lg cursor-pointer" />
             <i className="absolute top-1/2 left-1/2 transform w-7 h-7 transition-all duration-100 rounded-full group-hover:bg-red-300/20 z-0 -translate-x-1/2 -translate-y-1/2" />
           </div>
         </div>
