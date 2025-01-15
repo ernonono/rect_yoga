@@ -3,7 +3,8 @@ import KalenderJanji from "../../components/Calendar";
 import useRegisterStore from "../../states/useRegister";
 import dayjs from "dayjs";
 import CardDokter from "../../components/CardDokter";
-import { useNavigate } from "react-router-dom";
+import { Modal } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 
 function PilihTanggal({ open, onClose, onFinish }) {
   const { tanggal, setTanggal } = useRegisterStore((state) => state);
@@ -17,15 +18,37 @@ function PilihTanggal({ open, onClose, onFinish }) {
   }, [time]);
 
   return (
-    <div
-      className={`w-[75vw] rounded-lg bg-white z-[999]  absolute transition-all left-1/2 transform -translate-x-1/2 duration-100 ${!open ? "translate-y-[9999px]" : "translate-y-24"}`}
+    <Modal
+      width={1000}
+      title={
+        <h1 className="text-lg font-semibold text-white">Pilih Tanggal</h1>
+      }
+      centered
+      okButtonProps={{ hidden: true }}
+      open={open}
+      onClose={onClose}
+      onCancel={onClose}
+      closeIcon={<CloseOutlined className="text-white" />}
+      styles={{
+        header: {
+          backgroundColor: "#63A375",
+          height: 55,
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          padding: "0 20px",
+        },
+        content: {
+          padding: 0,
+          paddingRight: 0,
+          paddingBottom: 16,
+        },
+
+        footer: {
+          display: "none",
+        },
+      }}
     >
-      <div className="h-20 bg-[#63A375] rounded-t-lg flex items-center justify-between text-white px-5">
-        <span className="font-bold text-xl">Pilih Tanggal</span>
-        <span onClick={onClose} className="font-bold text-xl cursor-pointer">
-          X
-        </span>
-      </div>
       <div className="my-10">
         <div className="flex gap-10 justify-center">
           <CardDokter />
@@ -75,7 +98,7 @@ function PilihTanggal({ open, onClose, onFinish }) {
           </div>
         </div>
 
-        <div className="w-full flex justify-center mt-5">
+        <div className="w-full flex justify-center mt-6">
           <button
             disabled={!tanggal}
             onClick={onFinish}
@@ -89,7 +112,7 @@ function PilihTanggal({ open, onClose, onFinish }) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

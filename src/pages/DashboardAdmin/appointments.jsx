@@ -3,13 +3,15 @@ import {
   Avatar,
   Button,
   Card,
+  DatePicker,
   Descriptions,
   Drawer,
+  Empty,
   Input,
   Modal,
+  Select,
   Skeleton,
   Timeline,
-  Tooltip,
   Typography,
 } from "antd";
 import React, { useEffect, useState } from "react";
@@ -17,12 +19,13 @@ import instance from "../../utils/axios";
 import {
   UserOutlined,
   FileTextOutlined,
-  EditOutlined,
-  DeleteOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { parseParams } from "../../utils/parseParams";
+import debounce from "lodash/debounce";
 
 const abbreviate = (name) => {
   const firstName = name.split(" ")[0];
@@ -33,18 +36,28 @@ const abbreviate = (name) => {
   return `${firstName} ${lastNames.join(".")}`;
 };
 
-const SkeletonCards = () => (
-  <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-    {[1, 2, 3, 4, 5].map((item) => (
+export const SkeletonCards = ({ noGrid = false }) =>
+  noGrid ? (
+    [1, 2, 3, 4, 5].map((item) => (
       <Skeleton.Node
         style={{ width: "100%", height: 200 }}
         active
         children={false}
         key={item}
       ></Skeleton.Node>
-    ))}
-  </div>
-);
+    ))
+  ) : (
+    <div className={"grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"}>
+      {[1, 2, 3, 4, 5].map((item) => (
+        <Skeleton.Node
+          style={{ width: "100%", height: 200 }}
+          active
+          children={false}
+          key={item}
+        ></Skeleton.Node>
+      ))}
+    </div>
+  );
 
 const CardData = ({ data, onClick, onRM }) => (
   <div className="bg-white flex flex-col justify-between min-h-[200px] p-5 rounded-lg shadow-md">
@@ -61,7 +74,7 @@ const CardData = ({ data, onClick, onRM }) => (
           {dayjs(data.appointment_date).format("HH:mm")}
         </Typography.Title>
         <Typography.Text className="uppercase text-[#D6DADF] text-xl font-bold">
-          {data.doctor.poli.name}
+          {data?.doctor?.poli?.name || "Poli/Dokter tidak ditemukan"}
         </Typography.Text>
       </div>
     </div>
@@ -231,13 +244,35 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
 function AppointmentDoctor() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  const [filter, setFilter] = useState({
+    patient_name: "",
+    poli_id: "",
+    start_date: "",
+    end_date: "",
+  });
   const [registrationId, setRegistrationId] = useState(null);
   const [dataRM, setDataRM] = useState(null);
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["doctor-appointments"],
+    queryKey: ["doctor-appointments", filter],
     queryFn: async () => {
-      const { data } = await instance.get("/registrations");
+      const { data } = await instance.get(
+        `/registrations?${parseParams(filter)}`,
+      );
       return data;
+    },
+  });
+
+  const { data: polis, isLoading: poliLoading } = useQuery({
+    queryKey: ["polis"],
+    queryFn: async () => {
+      const { data } = await instance.get("/polis");
+
+      const options = data.map((item) => ({
+        label: item.name,
+        value: item.id,
+      }));
+
+      return options;
     },
   });
 
@@ -295,14 +330,65 @@ function AppointmentDoctor() {
     }
   }, [registrationId, data]);
 
+  const onChangePoli = (value) =>
+    setFilter({ ...filter, poli_id: value || "" });
+  const onChangeDate = (value) => {
+    if (value) {
+      setFilter({
+        ...filter,
+        start_date: value[0].format("YYYY-MM-DD"),
+        end_date: value[1].format("YYYY-MM-DD"),
+      });
+    } else {
+      setFilter({
+        ...filter,
+        start_date: "",
+        end_date: "",
+      });
+    }
+  };
+  const onSearchName = (v) => setFilter({ ...filter, patient_name: v || "" });
+
   return (
     <div>
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
         JADWAL JANJI
       </Typography.Title>
 
+      <div className="flex mb-3 bg-[#F5F5F5] py-3 rounded-md px-4 flex-col md:flex-row items-center gap-2">
+        <FilterOutlined className="text-xl text-[#767676] mr-2" />
+        <Input.Search
+          onSearch={onSearchName}
+          placeholder="Nama Pasien"
+          className="w-full md:w-1/6"
+          allowClear
+        />
+        <Select
+          onChange={onChangePoli}
+          placeholder="Poli"
+          allowClear
+          className="w-full md:w-1/6"
+          loading={poliLoading}
+          options={polis}
+          showSearch
+          optionFilterProp="label"
+        />
+        <DatePicker.RangePicker
+          allowClear
+          onChange={onChangeDate}
+          placeholder={["Tgl Awal", "Tgl Akhir"]}
+          className="w-full md:w-1/6"
+        />
+      </div>
+
       {isLoading ? (
         <SkeletonCards />
+      ) : data?.length === 0 ? (
+        <Empty
+          className="mt-12"
+          description="Tidak ada data"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {data?.map((item) => (

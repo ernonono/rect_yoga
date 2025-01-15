@@ -26,7 +26,6 @@ const AdminLayout = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const currentPath = window.location.pathname;
 
-  const [showLogout, setShowLogout] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const {

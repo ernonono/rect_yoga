@@ -174,25 +174,6 @@ export default function Login() {
               Dont have an account?
               <span className="text-[#63A375]"> Register Here</span>
             </p>
-            <div className="flex flex-grow mt-28 justify-end">
-              <div className="w-[100px] pl-4">
-                <Button className="bg-[#63A375] w-full h-[48px]">
-                  <span className="text-white text-[12px]">Login as Admin</span>
-                </Button>
-              </div>
-              <div className="w-[100px] pl-4">
-                <Button className="bg-[#63A375] w-full h-[48px]">
-                  <span className="text-white text-[12px]">
-                    Login as Doctor
-                  </span>
-                </Button>
-              </div>
-              <div className="w-[100px] pl-4">
-                <Button className="bg-[#63A375] w-full h-[48px]">
-                  <span className="text-white text-[12px]">Login as User</span>
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

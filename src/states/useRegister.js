@@ -10,6 +10,7 @@ const useRegisterStore = create(
       dokter_id: "",
       tanggal: "",
       tipe_pembayaran: "",
+      dokter_data: null,
       setPoli: (name, id) =>
         set((state) => ({
           ...state,
@@ -32,6 +33,12 @@ const useRegisterStore = create(
           ...state,
           tipe_pembayaran,
         })),
+      setDokterData: (data) => {
+        set((state) => ({
+          ...state,
+          dokter_data: data,
+        }));
+      },
       reset: () =>
         set((state) => ({
           ...state,

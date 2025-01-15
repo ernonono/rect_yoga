@@ -1,5 +1,13 @@
-import { Card, Descriptions, Modal, Typography, message } from "antd";
-import React from "react";
+import {
+  Card,
+  Descriptions,
+  Input,
+  Modal,
+  Select,
+  Typography,
+  message,
+} from "antd";
+import React, { useState } from "react";
 import GambarDoktor from "../../assets/gambar_doktor.png";
 import {
   FacebookOutlined,
@@ -8,10 +16,12 @@ import {
   XOutlined,
   EditOutlined,
   DeleteOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
+import { parseParams } from "../../utils/parseParams";
 
 function SocialMediaButton({ icon, link }) {
   return (
@@ -138,14 +148,40 @@ function Loading() {
 
 export default function DoctorList() {
   const [selectedData, setSelectedData] = React.useState(null);
+  const [filter, setFilter] = useState({
+    name: "",
+    poli_id: "",
+    specialty: "",
+  });
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["doctor-list"],
+    queryKey: ["doctor-list", filter],
     queryFn: async () => {
-      const { data } = await instance.get("doctors");
+      const { data } = await instance.get(`doctors?${parseParams(filter)}`);
 
       return data;
     },
   });
+
+  const { data: polis, isLoading: poliLoading } = useQuery({
+    queryKey: ["polis"],
+    queryFn: async () => {
+      const { data } = await instance.get("/polis");
+
+      const options = data.map((item) => ({
+        label: item.name,
+        value: item.id,
+      }));
+
+      return options;
+    },
+  });
+
+  const onChangeFilter = (property, value) => {
+    setFilter({
+      ...filter,
+      [property]: value || "",
+    });
+  };
 
   const descriptionItems = [
     {
@@ -191,6 +227,32 @@ export default function DoctorList() {
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
         SEMUA DOKTOR
       </Typography.Title>
+
+      <div className="flex mb-3 bg-[#F5F5F5] py-3 rounded-md px-4 flex-col md:flex-row items-center gap-2">
+        <FilterOutlined className="text-xl text-[#767676] mr-2" />
+        <Input.Search
+          onSearch={(value) => onChangeFilter("name", value)}
+          placeholder="Nama Doktor"
+          className="w-full md:w-1/6"
+          allowClear
+        />
+        <Input.Search
+          onSearch={(value) => onChangeFilter("specialty", value)}
+          placeholder="Spesialis Doktor"
+          className="w-full md:w-1/6"
+          allowClear
+        />
+        <Select
+          onChange={(value) => onChangeFilter("poli_id", value)}
+          placeholder="Poli"
+          allowClear
+          className="w-full md:w-1/6"
+          loading={poliLoading}
+          options={polis}
+          showSearch
+          optionFilterProp="label"
+        />
+      </div>
 
       <div className="grid grid-cols-3 gap-4">
         {isLoading ? (

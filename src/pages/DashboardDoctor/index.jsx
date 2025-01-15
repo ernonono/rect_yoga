@@ -1,27 +1,52 @@
 import {
+  Button,
   Calendar,
   Card,
+  DatePicker,
   Descriptions,
+  Drawer,
+  Form,
+  Input,
   Popover,
   Skeleton,
   Statistic,
   Tag,
   Typography,
 } from "antd";
-import React from "react";
-import { CalendarOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { CalendarOutlined, PlusOutlined } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { formatDate } from "../halaman/konfirmasi";
 
 function DashboardDoctor() {
+  const [form] = Form.useForm();
+  const loggedinDoktor = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery({
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["doctor-registration"],
     queryFn: async () => {
-      const { data } = await instance.get("/registrations-doctor");
+      const { data } = await instance.get("/registrations-doctor-agenda");
       return data;
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: (form) => instance.post("/registrations", form),
+    onSuccess: () => {
+      toast.success("Agenda Berhasil Ditambahkan");
+      setOpenDrawer(false);
+      refetch();
+
+      form.resetFields();
+    },
+
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Gagal menambahkan agenda");
     },
   });
 
@@ -44,7 +69,6 @@ function DashboardDoctor() {
   };
 
   const monthCellRender = (value) => {
-    console.log(value);
     const dataLength = getTotalAppointments(value);
     return dataLength > 0 ? (
       <div className="notes-month">
@@ -58,33 +82,47 @@ function DashboardDoctor() {
     const data = getAppointments(value);
 
     const Content = ({ data }) => {
-      const items = [
-        {
-          label: "Patient Name",
-          children: data.patient.name,
-        },
-        {
-          label: "Patient Phone",
-          children: data.patient.phone,
-        },
-        {
-          label: "Payment Type",
-          children: data.payment_type,
-        },
-        {
-          label: "Status",
-          children: (
-            <Tag color={data.status === "Belum Selesai" ? "red" : "green"}>
-              {data.status}
-            </Tag>
-          ),
-        },
-      ];
+      const items =
+        data.type === "appointment"
+          ? [
+              {
+                label: "Patient Name",
+                children: data.patient.name,
+              },
+              {
+                label: "Patient Phone",
+                children: data.patient.phone,
+              },
+              {
+                label: "Payment Type",
+                children: data.payment_type,
+              },
+              {
+                label: "Status",
+                children: (
+                  <Tag
+                    color={data.status === "Belum Selesai" ? "red" : "green"}
+                  >
+                    {data.status}
+                  </Tag>
+                ),
+              },
+            ]
+          : [
+              {
+                label: "Description",
+                children: data.description,
+              },
+            ];
       return (
         <Descriptions
           bordered
           className="w-full"
-          title="Appointment Details"
+          title={
+            data.type === "appointment"
+              ? "Appointment Details"
+              : "Agenda Details"
+          }
           items={items}
           column={1}
           size="small"
@@ -92,7 +130,7 @@ function DashboardDoctor() {
       );
     };
 
-    return (
+    return data?.length > 0 ? (
       <div className="events">
         {data.map((item) => (
           <Popover
@@ -106,7 +144,7 @@ function DashboardDoctor() {
 
                 navigate(`/doctor/appointments?identifier=${item.id}`);
               }}
-              className="bg-primary px-2 text-white rounded-md"
+              className={`${item.type === "agenda" ? "bg-orange-400" : "bg-primary"} px-2 text-white rounded-md`}
             >
               <div className="font-bold">
                 {dayjs(item?.appointment_date).format("HH:mm")}
@@ -116,6 +154,26 @@ function DashboardDoctor() {
           </Popover>
         ))}
       </div>
+    ) : (
+      <Popover
+        content={
+          <Button
+            onClick={() => {
+              form.setFieldsValue({
+                appointment_date: dayjs(value).hour(8).minute(0),
+              });
+              setOpenDrawer(true);
+            }}
+            type="primary"
+            icon={<PlusOutlined />}
+          >
+            Add Agenda
+          </Button>
+        }
+        placement="right"
+      >
+        <div className="events w-full h-full"></div>
+      </Popover>
     );
   };
 
@@ -123,6 +181,16 @@ function DashboardDoctor() {
     if (info.type === "date") return dateCellRender(current, info);
     if (info.type === "month") return monthCellRender(current, info);
     return info.originNode;
+  };
+
+  const onFinish = (values) => {
+    mutation.mutate({
+      ...values,
+      appointment_date: formatDate(values.appointment_date.toISOString()),
+      doctor_id: loggedinDoktor.doctor_id,
+      registry_date: formatDate(dayjs().toISOString()),
+      type: "agenda",
+    });
   };
 
   return (
@@ -137,7 +205,17 @@ function DashboardDoctor() {
             loading={isLoading}
             title="Total Registration"
             precision={0}
-            value={data?.length}
+            value={data?.filter((item) => item.type === "appointment").length}
+            valueStyle={{ color: "#3f8600" }}
+            prefix={<CalendarOutlined />}
+          />
+        </Card>
+        <Card className="min-w-[250px]">
+          <Statistic
+            loading={isLoading}
+            title="Total Agenda"
+            precision={0}
+            value={data?.filter((item) => item.type === "agenda").length}
             valueStyle={{ color: "#3f8600" }}
             prefix={<CalendarOutlined />}
           />
@@ -145,6 +223,31 @@ function DashboardDoctor() {
       </div>
 
       {isLoading ? <Skeleton active /> : <Calendar cellRender={cellRender} />}
+
+      <Drawer
+        title="Add Agenda"
+        open={openDrawer}
+        onClose={() => setOpenDrawer(false)}
+      >
+        <Form onFinish={onFinish} form={form} layout="vertical">
+          <Form.Item label="Description" name="description">
+            <Input />
+          </Form.Item>
+
+          <Form.Item label="Date and Time" name="appointment_date">
+            <DatePicker showTime format="DD MM YYYY HH:mm" className="w-full" />
+          </Form.Item>
+
+          <Button
+            onClick={() => form.submit()}
+            loading={mutation.isPending}
+            type="primary"
+            htmlType="button"
+          >
+            Submit
+          </Button>
+        </Form>
+      </Drawer>
     </div>
   );
 }

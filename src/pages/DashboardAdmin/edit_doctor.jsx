@@ -11,7 +11,7 @@ import {
   message,
 } from "antd";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   InboxOutlined,
   MinusCircleOutlined,
@@ -40,11 +40,18 @@ export default function EditDoctor() {
     },
   });
 
-  const { isLoading: loadingDoctor } = useQuery({
+  const { data: dataDoctor, isLoading: loadingDoctor } = useQuery({
     queryKey: ["doctor", id],
     queryFn: async () => {
       const { data } = await instance.get(`doctors/${id}`);
 
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (dataDoctor) {
+      const data = dataDoctor;
       // set form values
       form.setFieldsValue({
         ...data,
@@ -64,10 +71,8 @@ export default function EditDoctor() {
         const url = `http://localhost:8000/doctor_image/${data.image}`;
         setImageUrl(url);
       }
-
-      return data;
-    },
-  });
+    }
+  }, [dataDoctor]);
 
   const uploadProps = {
     name: "file",
@@ -187,8 +192,10 @@ export default function EditDoctor() {
     // });
 
     values.birthdate = dayjs(values.birthdate).format("YYYY-MM-DD");
-    values.education = JSON.stringify(values.education);
-    values.actions = JSON.stringify(values.actions);
+    values.education = values.education
+      ? JSON.stringify(values.education)
+      : null;
+    values.actions = values.actions ? JSON.stringify(values.actions) : null;
 
     if (image) {
       // handle upload later

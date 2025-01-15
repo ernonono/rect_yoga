@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import instance from "../../utils/axios";
 import {
   Button,
@@ -10,19 +10,35 @@ import {
   Typography,
   notification,
 } from "antd";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  FilterOutlined,
+} from "@ant-design/icons";
+import { parseParams } from "../../utils/parseParams";
 
 export default function Poli() {
   const [form] = Form.useForm();
   const [selected, setSelected] = React.useState(null);
+  const [filter, setFilter] = useState({
+    name: "",
+    location: "",
+  });
   const { data, error, refetch, isFetching } = useQuery({
-    queryKey: ["poli-list"],
+    queryKey: ["poli-list", filter],
     queryFn: async () => {
-      const { data } = await instance.get("polis");
+      const { data } = await instance.get(`polis?${parseParams(filter)}`);
 
       return data;
     },
   });
+
+  const onChangeFilter = (property, value) => {
+    setFilter({
+      ...filter,
+      [property]: value || "",
+    });
+  };
 
   const edit = useMutation({
     mutationFn: (form) => {
@@ -112,6 +128,22 @@ export default function Poli() {
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
         SEMUA POLI
       </Typography.Title>
+
+      <div className="flex bg-[#F5F5F5] py-3 rounded-t-md px-4 flex-col md:flex-row items-center gap-2">
+        <FilterOutlined className="text-xl text-[#767676] mr-2" />
+        <Input.Search
+          onSearch={(value) => onChangeFilter("name", value)}
+          placeholder="Nama Poli"
+          className="w-full md:w-1/6"
+          allowClear
+        />
+        <Input.Search
+          onSearch={(value) => onChangeFilter("location", value)}
+          placeholder="Lokasi Poli"
+          className="w-full md:w-1/6"
+          allowClear
+        />
+      </div>
 
       <Table
         columns={columns}

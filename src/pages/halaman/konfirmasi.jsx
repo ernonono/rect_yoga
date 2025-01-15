@@ -8,7 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import { toast } from "react-toastify";
 
-const formatDate = (date) => {
+export const formatDate = (date) => {
   const d = new Date(date);
   const year = d.getFullYear();
   const month = ("0" + (d.getMonth() + 1)).slice(-2);
@@ -64,7 +64,7 @@ export default function Konfirmasi() {
   return (
     <div className="relative">
       <Navbar />
-      <Banner />
+      {/* <Banner /> */}
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white shadow-md rounded-3xl p-6 w-full max-w-4xl">
           <h1 className="text-xl font-bold mb-4">Konfirmasi Pendaftaran</h1>

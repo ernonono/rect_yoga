@@ -1,18 +1,15 @@
-import { Card, Descriptions, Modal, Typography, message } from "antd";
-import React from "react";
-import GambarDoktor from "../../assets/gambar_doktor.png";
+import { Card, Descriptions, Input, Modal, Typography, message } from "antd";
+import React, { useState } from "react";
 import {
-  FacebookOutlined,
-  GooglePlusOutlined,
-  LinkedinOutlined,
-  XOutlined,
   EditOutlined,
   DeleteOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import { parseParams } from "../../utils/parseParams";
 
 function PatientItem({ patient, onClick, refetch }) {
   const navigate = useNavigate();
@@ -98,23 +95,29 @@ function Loading() {
 
 export default function PatientList() {
   const [selectedData, setSelectedData] = React.useState(null);
+  const [filter, setFilter] = useState({
+    name: "",
+  });
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["patient-list"],
+    queryKey: ["patient-list", filter],
     queryFn: async () => {
-      const { data } = await instance.get("patients");
+      const { data } = await instance.get(`patients?${parseParams(filter)}`);
 
       return data;
     },
   });
 
+  const onChangeFilter = (property, value) => {
+    setFilter({
+      ...filter,
+      [property]: value || "",
+    });
+  };
+
   const descriptionItems = [
     {
       label: "Nama",
       children: selectedData?.name,
-    },
-    {
-      label: "Poli",
-      children: selectedData?.poli?.name,
     },
     {
       label: "Email",
@@ -127,6 +130,16 @@ export default function PatientList() {
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
         SEMUA PASIEN
       </Typography.Title>
+
+      <div className="flex mb-3 bg-[#F5F5F5] py-3 rounded-md px-4 flex-col md:flex-row items-center gap-2">
+        <FilterOutlined className="text-xl text-[#767676] mr-2" />
+        <Input.Search
+          onSearch={(value) => onChangeFilter("name", value)}
+          placeholder="Nama Pasien"
+          className="w-full md:w-1/6"
+          allowClear
+        />
+      </div>
 
       <div className="grid grid-cols-4 gap-5">
         {isLoading ? (
