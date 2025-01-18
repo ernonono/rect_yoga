@@ -110,6 +110,11 @@ const DoctorLayout = () => {
             <Avatar
               size={45}
               icon={<UserCircleIcon className="text-[#63A375]" />}
+              src={
+                user?.doctor?.image
+                  ? `http://localhost:8000/doctor_image/${user.doctor.image}`
+                  : null
+              }
             />
             <div
               className="w-fit"
@@ -159,7 +164,8 @@ const DoctorLayout = () => {
               margin: "24px 16px",
               padding: 24,
               minHeight: 280,
-              background: colorBgContainer,
+              background:
+                currentPath === "/doctor/profile" ? "" : colorBgContainer,
               borderRadius: borderRadiusLG,
             }}
           >

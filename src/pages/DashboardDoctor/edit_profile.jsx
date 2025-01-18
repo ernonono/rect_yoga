@@ -8,7 +8,6 @@ import {
   Space,
   Typography,
   Upload,
-  message,
 } from "antd";
 import dayjs from "dayjs";
 import React, { useEffect } from "react";
@@ -16,6 +15,7 @@ import {
   InboxOutlined,
   MinusCircleOutlined,
   PlusOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
@@ -24,11 +24,10 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const { Dragger } = Upload;
 
-export default function EditDoctor() {
+export default function EditProfileDoctor() {
   const [form] = Form.useForm();
   const [image, setImage] = React.useState(null);
   const [imageUrl, setImageUrl] = React.useState(null);
-  const { id } = useParams();
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
@@ -41,9 +40,9 @@ export default function EditDoctor() {
   });
 
   const { data: dataDoctor, isLoading: loadingDoctor } = useQuery({
-    queryKey: ["doctor", id],
+    queryKey: ["doctor"],
     queryFn: async () => {
-      const { data } = await instance.get(`doctors/${id}`);
+      const { data } = await instance.get(`users/me`);
 
       return data;
     },
@@ -52,14 +51,15 @@ export default function EditDoctor() {
   useEffect(() => {
     if (dataDoctor) {
       const data = dataDoctor;
+      const doctor = data.doctor;
       // set form values
       form.setFieldsValue({
-        ...data,
-        birthdate: data?.birthdate ? dayjs(data.birthdate) : null,
-        email: data.user.email,
-        actions: data?.actions ? JSON.parse(data.actions) : null,
-        education: data?.education
-          ? JSON.parse(data.education).map((item) => ({
+        ...doctor,
+        birthdate: doctor?.birthdate ? dayjs(doctor.birthdate) : null,
+        email: data.email,
+        actions: doctor?.actions ? JSON.parse(doctor.actions) : null,
+        education: doctor?.education
+          ? JSON.parse(doctor.education).map((item) => ({
               ...item,
               start_year: dayjs(item.start_year),
               end_year: dayjs(item.end_year),
@@ -67,8 +67,8 @@ export default function EditDoctor() {
           : null,
       });
 
-      if (data.image) {
-        const url = `http://localhost:8000/doctor_image/${data.image}`;
+      if (doctor.image) {
+        const url = `http://localhost:8000/doctor_image/${doctor.image}`;
         setImageUrl(url);
       }
     }
@@ -85,11 +85,11 @@ export default function EditDoctor() {
   };
 
   const mutation = useMutation({
-    mutationFn: (body) => instance.put(`doctors/${id}`, body),
+    mutationFn: (body) => instance.put(`users/update-profile`, body),
     onSuccess: (res) => {
-      toast.success("Berhasil mengubah dokter dokter");
+      toast.success("Berhasil mengubah profil");
       form.resetFields();
-      navigate("/admin/doctors");
+      navigate("/doctor/profile");
     },
 
     onError: (error) => {
@@ -97,7 +97,7 @@ export default function EditDoctor() {
       toast.error(
         error?.response?.data?.message ||
           error?.response?.data ||
-          "Gagal menambahkan dokter",
+          "Gagal menambahkan profil",
       );
     },
   });
@@ -227,9 +227,18 @@ export default function EditDoctor() {
 
   return (
     <>
-      <Typography.Title className="text-[#767676] tracking-tight" level={2}>
-        EDIT DOKTOR
-      </Typography.Title>
+      <div className="flex items-center gap-3 mb-3">
+        <Button
+          onClick={() => navigate("/doctor/profile")}
+          icon={<ArrowLeftOutlined />}
+        />
+        <Typography.Title
+          className="text-[#767676] tracking-tight m-0"
+          level={2}
+        >
+          EDIT PROFIL
+        </Typography.Title>
+      </div>
       <Form
         scrollToFirstError
         onFinish={onFinish}

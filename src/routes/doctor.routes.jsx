@@ -5,6 +5,8 @@ import DashboardDoctor from "../pages/DashboardDoctor";
 import DoctorAppointments from "../pages/DashboardDoctor/appointment";
 import AddRekamMedis from "../pages/DashboardDoctor/add_rm";
 import EditRekamMedis from "../pages/DashboardDoctor/edit_rm";
+import DoctorProfile from "../pages/DashboardDoctor/profile";
+import EditProfileDoctor from "../pages/DashboardDoctor/edit_profile";
 
 function DoctorRoutes() {
   return (
@@ -12,7 +14,8 @@ function DoctorRoutes() {
       <Route path="/doctor" element={<DoctorLayout />}>
         <Route index element={<DashboardDoctor />} />
         <Route path="appointments" element={<DoctorAppointments />} />
-        <Route path="profile" element={<div>Doctor Profile</div>} />
+        <Route path="profile" element={<DoctorProfile />} />
+        <Route path="profile/edit" element={<EditProfileDoctor />} />
         <Route
           path="medical-record/add-rekam-medis"
           element={<AddRekamMedis />}

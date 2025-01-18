@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import instance from "../utils/axios";
 import { useNavigate } from "react-router-dom";
+import { Button, Menu, Popover } from "antd";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 
 const link = [
   { text: "Beranda", path: "/beranda" },
@@ -62,52 +64,65 @@ export default function Navbar() {
       });
     },
   });
+  const PopoverContent = () => {
+    return (
+      <Menu className="w-[200px]">
+        <Menu.Item icon={<UserOutlined />}>
+          <a href="/profile">Profile</a>
+        </Menu.Item>
+        <Menu.Item
+          danger
+          className="mt-5"
+          onClick={() => mutation.mutate()}
+          icon={<LogoutOutlined />}
+        >
+          Logout
+        </Menu.Item>
+      </Menu>
+    );
+  };
+
+  const getImageUrl = (image_name) => {
+    return `http://localhost:8000/patient_image/${image_name}`;
+  };
 
   return (
-    <div className="flex justify-between bg-white shadow-sm h-[100px]">
-      <div className="flex flex-grow items-center justify-start px-6">
+    <div className="flex px-6 justify-between items-center bg-white shadow-sm py-5">
+      <div className="flex flex-grow items-center justify-start ">
         {link.map((link, index) => (
-          <a
-            key={index}
-            href={link.path}
-            className="mx-[10px] font-semibold text-[20px] text-[#63A375]"
-          >
-            {link.text}
+          <a key={index} href={link.path}>
+            <Button type="link" size="large">
+              {link.text}
+            </Button>
           </a>
         ))}
       </div>
 
-      <div
-        onClick={() => setShowLogout(!showLogout)}
-        className="flex cursor-pointer relative min-w-[150px] items-center bg-[#F9F9F9] rounded-[100px] py-2 px-4 mr-9"
+      <Popover
+        arrow={false}
+        placement="bottomRight"
+        trigger="click"
+        content={<PopoverContent />}
       >
-        <div className="p-2">
+        <div className="flex cursor-pointer relative min-w-[150px] h-fit items-center pl-1 pr-6 py-1 rounded-full  border border-gray-100 bg-[#F9F9F9] ">
           <img
-            src={Avatar}
+            src={
+              user?.patient?.image ? getImageUrl(user.patient.image) : Avatar
+            }
             alt="star"
             style={{ borderRadius: "50%", width: "45px", height: "45px" }}
+            className="object-cover "
           />
+          <div className="ml-3">
+            <div className="font-bold text-sm text-[#292929]">
+              {user?.name || "User"}
+            </div>
+            <div className="text-xs text-[#B5B5B5]">
+              {capitalize(user?.role || "guest")}
+            </div>
+          </div>
         </div>
-        <div className="ml-1">
-          <div className="font-bold text-[16px] text-[#292929] mr-[8px]">
-            {user?.name || "User"}
-          </div>
-          <div className="text-[14px] text-[#B5B5B5]">
-            {capitalize(user?.role || "guest")}
-          </div>
-        </div>
-
-        {showLogout && (
-          <div
-            onClick={() => mutation.mutate()}
-            className="absolute z-[9999] right-0 top-7 mt-12 w-[200px]
-            hover:bg-[#F9F9F9]
-          bg-white shadow-md rounded-md p-4"
-          >
-            <div className="text-[14px] text-[#292929]">Logout</div>
-          </div>
-        )}
-      </div>
+      </Popover>
     </div>
   );
 }

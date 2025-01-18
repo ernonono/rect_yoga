@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { EyeIcon, EyeSlashIcon, UserIcon } from "@heroicons/react/16/solid";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/ImageLogin.png";
-import Button from "../../components/Button";
+import Blob_1 from "../../assets/blob_1.png";
+import Blob_2 from "../../assets/blob_2.png";
 import { useMutation } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import { toast } from "react-toastify";
+import { Button } from "antd";
 
 export default function Login() {
   const toastId = useRef(null);
@@ -86,8 +88,19 @@ export default function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="w-[1509px] p-8 bg-white shadow-md rounded-md items-center">
+    <div className="flex relative justify-center items-center h-screen">
+      <img
+        src={Blob_1}
+        alt="blob"
+        className="absolute bottom-0 left-0 h-[80vh] z-[-1]"
+      />
+      <img
+        src={Blob_2}
+        alt="blob"
+        className="absolute top-0 right-0 h-[80vh] z-[-1]"
+      />
+
+      <div className="px-8 py-24 bg-white shadow-md rounded-md items-center">
         <div className="w-full flex justify-between">
           <div className="w-1/2 pr-4">
             <img src={Logo} alt="star" />
@@ -142,36 +155,24 @@ export default function Login() {
               </div>
             </div>
             <div className="w-full flex justify-between">
-              <div className="w-1/4 py-3 pr-4">
-                <div className="mb-6 flex items-center">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    name="remember"
-                    className="mr-2 h-4 w-4"
-                  />
-                  <label htmlFor="remember" className="text-[14px]">
-                    Remember me
-                  </label>
-                </div>
-              </div>
-              <div className="w-full pl-4">
+              <div className="w-full mb-3">
                 <Button
-                  disabled={mutation.isPending}
-                  className="bg-[#63A375] w-full h-[48px]"
+                  loading={mutation.isPending}
+                  size="large"
+                  block
+                  type="primary"
+                  className=""
                   onClick={handleLoginClick}
                 >
-                  <span className="text-white">
-                    {mutation.isPending ? "Loading..." : "Login"}
-                  </span>
+                  {mutation.isPending ? "Loading..." : "Login"}
                 </Button>
               </div>
             </div>
             <p
-              className="text-center cursor-pointer"
+              className="text-center text-gray-500 text-sm cursor-pointer"
               onClick={handleRegisterClick}
             >
-              Dont have an account?
+              Don't have an account?
               <span className="text-[#63A375]"> Register Here</span>
             </p>
           </div>

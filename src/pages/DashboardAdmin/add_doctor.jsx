@@ -303,11 +303,11 @@ export default function AddDoctor() {
             />
           </Form.Item>
           <Form.Item
-            label="Kode Rumah Sakit"
-            name="hospital_code"
+            label="Tentang Dokter"
+            name="about"
             className="md:w-7/12 w-full"
           >
-            <Input />
+            <Input.TextArea rows={4} />
           </Form.Item>
           <Form.Item
             label="Profesi"
@@ -332,11 +332,11 @@ export default function AddDoctor() {
             />
           </Form.Item>
           <Form.Item
-            label="Identifikasi Unik"
-            name="unique_number"
+            label="Deskripsi Spesialisasi"
+            name="specialty_description"
             className="md:w-7/12 w-full"
           >
-            <Input />
+            <Input.TextArea rows={4} />
           </Form.Item>
           <Form.Item
             label="Aksi Dokter"

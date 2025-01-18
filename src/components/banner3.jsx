@@ -1,6 +1,7 @@
 import React from "react";
 import Background from "../assets/bg.png";
 import { useNavigate } from "react-router-dom";
+import { Button } from "antd";
 
 export default function Banner() {
   const navigate = useNavigate();
@@ -22,12 +23,14 @@ export default function Banner() {
             praktis.
           </p>
           <div className="flex space-x-4">
-            <button
-              className="mt-10 bg-[#63A375] text-white py-2 px-4 rounded-lg hover:bg-green-500 h-[50px] w-[150px] transition duration-200"
+            <Button
               onClick={handlebannerClick}
+              type="primary"
+              size="large"
+              className="mt-7 px-14"
             >
               Daftar
-            </button>
+            </Button>
           </div>
         </div>
       </div>

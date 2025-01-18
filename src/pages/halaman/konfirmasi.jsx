@@ -109,7 +109,7 @@ export default function Konfirmasi() {
                 <p className="font-medium">{user?.patient?.address || ""}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <p className="text-gray-600">Keterangan</p>
+                <p className="text-gray-600">Keluhan</p>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}

@@ -7,6 +7,7 @@ import Beranda from "../pages/Dashboard/Beranda";
 import PilihTanggal from "../pages/halaman/kalender";
 import Konfirmasi from "../pages/halaman/konfirmasi";
 import Poli from "../pages/Dashboard/Poli";
+import UserProfile from "../pages/halaman/user-profile";
 
 function UserRoutes() {
   return (
@@ -56,6 +57,14 @@ function UserRoutes() {
         element={
           <AuthGuard>
             <Konfirmasi />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <AuthGuard>
+            <UserProfile />
           </AuthGuard>
         }
       />

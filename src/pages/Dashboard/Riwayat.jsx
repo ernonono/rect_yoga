@@ -206,8 +206,8 @@ export default function Riwayat() {
   return (
     <div className="relative">
       <Navbar />
-      <Banner />
-      <div className="pb-18 mt-28 text-center">
+      {/* <Banner /> */}
+      <div className="pb-18 mt-10 text-center">
         <div className="font-black text-[#ADCEB7] text-[96px]">RIWAYAT</div>
         {isLoading ? (
           "Loading..."

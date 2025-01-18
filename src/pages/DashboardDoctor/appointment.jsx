@@ -67,6 +67,14 @@ const CardData = ({ data, onClick, onRM }) => (
       </div>
     </div>
 
+    <Card
+      title={<Typography.Text className="text-xs">Keluhan</Typography.Text>}
+      className="mt-2"
+      size="small"
+    >
+      <Typography.Text className="text-xs">{data.description}</Typography.Text>
+    </Card>
+
     <Button
       icon={<FileAddOutlined />}
       onClick={() => onClick(data.id)}

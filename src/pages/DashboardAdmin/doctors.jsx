@@ -23,7 +23,7 @@ import instance from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
 import { parseParams } from "../../utils/parseParams";
 
-function SocialMediaButton({ icon, link }) {
+export function SocialMediaButton({ icon, link }) {
   return (
     <a
       onClick={(e) => e.stopPropagation()}
