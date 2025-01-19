@@ -3,9 +3,11 @@ import {
   Avatar,
   Button,
   Card,
+  DatePicker,
   Descriptions,
   Drawer,
   Input,
+  List,
   Modal,
   Skeleton,
   Timeline,
@@ -106,7 +108,13 @@ const CardData = ({ data, onClick, onRM }) => (
   </div>
 );
 
-const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
+const MedicalRecordTimeline = ({
+  data,
+  onDelete,
+  onEdit,
+  deleteLoading,
+  onSearch,
+}) => {
   const [open, setOpen] = useState([data?.rm?.map(() => false)]);
   const items = data?.rm?.map((item, idx) => ({
     children: (
@@ -114,7 +122,7 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
         size="small"
         title={
           <div className="w-full flex justify-between items-center">
-            <span>{dayjs(item.date).format("DD MMMM YYYY")}</span>
+            <span>{item.rm_number}</span>
 
             <div className="flex gap-2">
               <Tooltip title="Edit Rekam Medis">
@@ -141,6 +149,15 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
         }
         className="mb-3"
       >
+        <div className="flex gap-2 mb-2">
+          <span className="font-semibold min-w-[60px]">Waktu Konsultasi</span>
+
+          <div className="flex gap-2">
+            <span>:</span>
+
+            {dayjs(item.created_at).format("DD MMMM YYYY HH:mm")}
+          </div>
+        </div>
         <div className="flex gap-2 mb-2">
           <span className="font-semibold min-w-[60px]">Gejala</span>
 
@@ -176,7 +193,7 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
           }}
           size="small"
         >
-          Resep Obat
+          Pengambilan Obat
         </Button>
 
         <Modal
@@ -198,14 +215,32 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
               return newOpen;
             });
           }}
-          title="Resep Obat"
+          title="Instruksi Pengambilan Obat"
         >
-          <Input.TextArea
-            value={item.prescription}
-            rows={10}
-            readOnly
-            className="w-full"
-          />
+          <Card title="Obat" size="small">
+            <List
+              size="small"
+              dataSource={item?.drug_code ? JSON.parse(item.drug_code) : []}
+              renderItem={(item, index) => (
+                <List.Item>
+                  <List.Item.Meta
+                    avatar={<span>{index + 1}</span>}
+                    title={item.name}
+                    description={`Kode Obat: ${item.code}`}
+                  />
+                </List.Item>
+              )}
+            />
+          </Card>
+          <Card title="Catatan Dokter" className="mt-4" size="small">
+            <Input.TextArea
+              value={item.prescription}
+              rows={7}
+              readOnly
+              variant="borderless"
+              className="w-full"
+            />
+          </Card>
         </Modal>
       </Card>
     ),
@@ -217,7 +252,7 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
       children: data?.registration.patient.name,
     },
     {
-      label: "Tanggal Check Up",
+      label: "Tanggal Janji",
       children: dayjs(data?.registration?.appointment_date).format(
         "dddd, D MMMM YYYY",
       ),
@@ -232,6 +267,11 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
         column={1}
         size="small"
       />
+
+      <div className="flex mb-4 gap-6 items-center justify-between">
+        <Input.Search onSearch={onSearch} placeholder="Cari Rekam Medis" />
+        <DatePicker.RangePicker />
+      </div>
 
       <Timeline reverse items={items} />
     </>

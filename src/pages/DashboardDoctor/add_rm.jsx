@@ -14,6 +14,8 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+import axios from "axios";
+import SearchObat from "../../components/SearchObat";
 
 const gejalaOptions = [
   "Demam",
@@ -32,6 +34,7 @@ function AddRekamMedis() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [params, _] = useSearchParams();
+  const [drugOptions, setDrugOptions] = React.useState([]);
   const { data, isLoading, error } = useQuery({
     queryKey: ["get-detail-registrasi", params.get("registration_id")],
     queryFn: async () => {
@@ -71,6 +74,7 @@ function AddRekamMedis() {
     values.doctor_id = data.doctor_id;
     values.patient_id = data.patient_id;
     values.symptomps = values.symptomps.join(",");
+    values.drug_code = JSON.stringify(values.drug_code);
 
     mutation.mutate(values);
   };
@@ -145,6 +149,7 @@ function AddRekamMedis() {
               <div className="w-3/4">
                 <Form.Item
                   label="Gejala"
+                  help="Jika pilihan gejala tidak ada, ketik gejala baru dan tekan enter"
                   name="symptomps"
                   rules={[
                     { required: true, message: "Gejala tidak boleh kosong" },
@@ -164,6 +169,7 @@ function AddRekamMedis() {
                 <Form.Item
                   label="Diagnosis"
                   name="diagnosis"
+                  help="Diagnosis penyakit pasien"
                   rules={[
                     { required: true, message: "Diagnosis tidak boleh kosong" },
                   ]}
@@ -172,10 +178,26 @@ function AddRekamMedis() {
                 </Form.Item>
 
                 <Form.Item
-                  label="Resep"
-                  name="prescription"
+                  label="Kode Obat"
+                  name="drug_code"
+                  className="w-full"
+                  help="Format: Nama Obat (Kode Obat)"
                   rules={[
-                    { required: true, message: "Resep tidak boleh kosong" },
+                    { required: true, message: "Kode Obat tidak boleh kosong" },
+                  ]}
+                >
+                  <SearchObat form={form} />
+                </Form.Item>
+
+                <Form.Item
+                  label="Catatan Doktor"
+                  name="prescription"
+                  help="Catatan dokter untuk pasien saat pengambilan obat"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Catatan Doktor tidak boleh kosong",
+                    },
                   ]}
                 >
                   <Input.TextArea rows={10} />
