@@ -25,7 +25,6 @@ import instance from "../../utils/axios";
 
 export default function DoctorProfile() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
 
   const { data, isLoading } = useQuery({
     queryKey: ["doctor-profile"],
@@ -138,7 +137,11 @@ export default function DoctorProfile() {
 
               <List
                 itemLayout="horizontal"
-                dataSource={data?.education ? JSON.parse(data?.education) : []}
+                dataSource={
+                  typeof data?.education === "string"
+                    ? JSON.parse(data?.education || [])
+                    : data?.education || []
+                }
                 renderItem={(item) => (
                   <List.Item>
                     <List.Item.Meta

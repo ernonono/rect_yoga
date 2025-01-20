@@ -16,6 +16,8 @@ const themeConfig = {
   },
 };
 
+document.title = "Fasyankes";
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <QueryClientProvider client={queryClient}>
     <ConfigProvider theme={themeConfig}>
