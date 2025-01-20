@@ -76,10 +76,6 @@ export default function Login() {
     mutation.mutate(form);
   };
 
-  useEffect(() => {
-    document.title = "Login - YOGA ";
-  }, []);
-
   const handleChange = (e) => {
     setForm((prevForm) => ({
       ...prevForm,

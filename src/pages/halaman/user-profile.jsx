@@ -120,7 +120,7 @@ export default function UserProfile() {
     <>
       <Navbar />
 
-      <div className="px-7 my-4">
+      <div className="max-w-6xl mx-auto my-4">
         <Typography.Title className="text-[#767676] tracking-tight" level={2}>
           PROFILE
         </Typography.Title>

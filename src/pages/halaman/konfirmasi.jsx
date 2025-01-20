@@ -61,6 +61,16 @@ export default function Konfirmasi() {
     navigate("/dokter");
   };
 
+  const onSubmit = () => {
+    if (!description) {
+      toast("Harap isi keluhan pasien", {
+        type: "error",
+      });
+      return;
+    }
+
+    mutation.mutate();
+  };
   return (
     <div className="relative">
       <Navbar />
@@ -129,7 +139,7 @@ export default function Konfirmasi() {
             <button
               disabled={mutation.isPending}
               className={`${mutation.isPending ? "bg-gray-700" : mutation.isError ? "bg-red-600" : "bg-green-500"} text-white px-4 py-2 rounded-md`}
-              onClick={() => mutation.mutate()}
+              onClick={onSubmit}
             >
               {mutation.isPending
                 ? "Loading..."

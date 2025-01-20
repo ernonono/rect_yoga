@@ -8,6 +8,7 @@ import PilihTanggal from "../pages/halaman/kalender";
 import Konfirmasi from "../pages/halaman/konfirmasi";
 import Poli from "../pages/Dashboard/Poli";
 import UserProfile from "../pages/halaman/user-profile";
+import ProfileDokter from "../pages/Dashboard/ProfileDokter";
 
 function UserRoutes() {
   return (
@@ -17,6 +18,14 @@ function UserRoutes() {
         element={
           <AuthGuard>
             <Poli />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/profil-dokter/:id"
+        element={
+          <AuthGuard>
+            <ProfileDokter />
           </AuthGuard>
         }
       />

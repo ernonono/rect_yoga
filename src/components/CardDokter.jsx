@@ -21,7 +21,12 @@ function CardDokter() {
 
       <p className="text-center font-bold mt-4">{dokter}</p>
       <p className="text-center ">{poli}</p>
-      <Button className="text-center" type="link">
+      <Button
+        target="_blank"
+        className="text-center"
+        href={`/profil-dokter/${dokter_data.id}`}
+        type="link"
+      >
         Lihat profil
       </Button>
     </div>

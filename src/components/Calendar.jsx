@@ -58,8 +58,10 @@ export default function KalenderJanji() {
           className="rounded-lg"
           validRange={[dayjs().startOf("day"), dayjs().add(365, "days")]}
           disabledDate={(current) => {
-            const found = registrations.find((item) =>
-              dayjs(item.appointment_date).isSame(current, "day"),
+            const found = registrations.find(
+              (item) =>
+                dayjs(item.appointment_date).isSame(current, "day") &&
+                item.type === "agenda",
             );
 
             return found;

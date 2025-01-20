@@ -3,12 +3,24 @@ import KalenderJanji from "../../components/Calendar";
 import useRegisterStore from "../../states/useRegister";
 import dayjs from "dayjs";
 import CardDokter from "../../components/CardDokter";
-import { Modal } from "antd";
+import { Modal, Skeleton } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
+import instance from "../../utils/axios";
+import { useQuery } from "@tanstack/react-query";
 
 function PilihTanggal({ open, onClose, onFinish }) {
-  const { tanggal, setTanggal } = useRegisterStore((state) => state);
+  const { tanggal, setTanggal, dokter_id } = useRegisterStore((state) => state);
   const [time, setTime] = useState(tanggal ? dayjs(tanggal).hour() : 8);
+
+  const { data: quota, isLoading: quotaLoading } = useQuery({
+    queryKey: ["quota", tanggal, dokter_id],
+    queryFn: async () => {
+      const { data } = await instance.get(
+        `/registrations-quota?date=${dayjs(tanggal).format("YYYY-MM-DD")}&doctor_id=${dokter_id}`,
+      );
+      return data;
+    },
+  });
 
   useEffect(() => {
     if (tanggal) {
@@ -16,6 +28,20 @@ function PilihTanggal({ open, onClose, onFinish }) {
       setTanggal(addedTime);
     }
   }, [time]);
+
+  const getTextColor = (quota) => {
+    if (quota > 5) {
+      return "text-green-500";
+    }
+
+    if (quota >= 3) {
+      return "text-yellow-500";
+    }
+
+    if (quota > 0) {
+      return "text-red-500";
+    }
+  };
 
   return (
     <Modal
@@ -61,38 +87,53 @@ function PilihTanggal({ open, onClose, onFinish }) {
             <div className="mt-5">
               <h2 className="text-lg font-semibold mb-2">Pilih Waktu</h2>
               <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => setTime(8)}
-                  className={`px-3 py-2 border rounded-lg ${
-                    time === 8 ? "bg-[#63A375] text-white" : ""
-                  }`}
-                >
-                  08:00
-                </button>
-                <button
-                  onClick={() => setTime(10)}
-                  className={`px-3 py-2 border rounded-lg ${
-                    time === 10 ? "bg-[#63A375] text-white" : ""
-                  }`}
-                >
-                  10:00
-                </button>
-                <button
-                  onClick={() => setTime(13)}
-                  className={`px-3 py-2 border rounded-lg ${
-                    time === 13 ? "bg-[#63A375] text-white" : ""
-                  }`}
-                >
-                  13:00
-                </button>
-                <button
-                  onClick={() => setTime(15)}
-                  className={`px-3 py-2 border rounded-lg ${
-                    time === 15 ? "bg-[#63A375] text-white" : ""
-                  }`}
-                >
-                  15:00
-                </button>
+                {quotaLoading ? (
+                  <>
+                    <Skeleton.Node
+                      active
+                      className="w-[142px] h-[61.6px]"
+                      children={<div />}
+                    />
+                    <Skeleton.Node
+                      active
+                      className="w-[142px] h-[61.6px]"
+                      children={<div />}
+                    />
+                    <Skeleton.Node
+                      active
+                      className="w-[142px] h-[61.6px]"
+                      children={<div />}
+                    />
+                    <Skeleton.Node
+                      active
+                      className="w-[142px] h-[61.6px]"
+                      children={<div />}
+                    />
+                  </>
+                ) : (
+                  Object.keys(quota || {}).map(
+                    (key) =>
+                      quota[key] > 0 && (
+                        <button
+                          key={key}
+                          onClick={() => setTime(Number(key))}
+                          className={`px-3 py-2 border rounded-lg  ${
+                            time === Number(key)
+                              ? "bg-[#63A375] text-white"
+                              : ""
+                          }`}
+                        >
+                          <p>{`${key.padStart(2, "0")}:00`}</p>
+
+                          <span
+                            className={`text-xs ${time === Number(key) ? "text-white" : getTextColor(quota?.[key])}`}
+                          >
+                            Kuota tersisa: {quota?.[key]}
+                          </span>
+                        </button>
+                      ),
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -100,15 +141,17 @@ function PilihTanggal({ open, onClose, onFinish }) {
 
         <div className="w-full flex justify-center mt-6">
           <button
-            disabled={!tanggal}
+            disabled={!tanggal || !time || quotaLoading}
             onClick={onFinish}
-            className={`px-10 py-2 ${!tanggal || !time ? "bg-gray-500" : "bg-[#63A375]"} rounded-lg text-white`}
+            className={`px-10 py-2 ${!tanggal || !time || quotaLoading ? "bg-gray-300 cursor-not-allowed" : "bg-[#63A375]"} rounded-lg text-white`}
           >
-            {tanggal && time
+            {tanggal && time && !quotaLoading
               ? "Daftar"
               : !tanggal
                 ? "Pilih Tanggal"
-                : "Pilih Waktu"}
+                : quotaLoading
+                  ? "Loading..."
+                  : "Pilih Waktu"}
           </button>
         </div>
       </div>
