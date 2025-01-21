@@ -22,10 +22,12 @@ import {
   FileAddOutlined,
   EditOutlined,
   DeleteOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { parseParams } from "../../utils/parseParams";
 
 const abbreviate = (name) => {
   const firstName = name.split(" ")[0];
@@ -283,10 +285,17 @@ function DoctorAppointments() {
   const [params, setParams] = useSearchParams();
   const [registrationId, setRegistrationId] = useState(null);
   const [dataRM, setDataRM] = useState(null);
+  const [filter, setFilter] = useState({
+    patient_name: "",
+    start_date: "",
+    end_date: "",
+  });
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["doctor-appointments"],
+    queryKey: ["doctor-appointments", filter],
     queryFn: async () => {
-      const { data } = await instance.get("/registrations-doctor");
+      const { data } = await instance.get(
+        `/registrations-doctor?${parseParams(filter)}`,
+      );
       return data;
     },
   });
@@ -345,11 +354,59 @@ function DoctorAppointments() {
     }
   }, [registrationId, data]);
 
+  const onChangeDate = (value) => {
+    if (value) {
+      setFilter({
+        ...filter,
+        start_date: value[0].format("YYYY-MM-DD"),
+        end_date: value[1].format("YYYY-MM-DD"),
+      });
+    } else {
+      setFilter({
+        ...filter,
+        start_date: "",
+        end_date: "",
+      });
+    }
+  };
+  const onSearchName = (v) => setFilter({ ...filter, patient_name: v || "" });
+
   return (
     <div>
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
         APPOINTMENTS
       </Typography.Title>
+
+      <div className="flex mb-3 bg-[#F5F5F5] py-3 rounded-md px-4 flex-col md:flex-row items-center gap-2">
+        <FilterOutlined className="text-xl text-[#767676] mr-2" />
+        <Input.Search
+          onSearch={onSearchName}
+          placeholder="Nama Pasien"
+          className="w-full md:w-1/6"
+          allowClear
+        />
+
+        <div className="flex gap-2 w-full md:w-2/6">
+          <DatePicker.RangePicker
+            allowClear
+            onChange={onChangeDate}
+            placeholder={["Tgl Awal", "Tgl Akhir"]}
+          />
+          <Button
+            onClick={() => {
+              setFilter({
+                ...filter,
+                start_date: dayjs().format("YYYY-MM-DD"),
+                end_date: dayjs().format("YYYY-MM-DD"),
+              });
+            }}
+            type="text"
+            className="text-xs text-gray-400"
+          >
+            Data hari ini
+          </Button>
+        </div>
+      </div>
 
       {isLoading ? (
         <SkeletonCards />
