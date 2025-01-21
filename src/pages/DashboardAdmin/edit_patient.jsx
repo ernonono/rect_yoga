@@ -211,19 +211,7 @@ export default function EditPatient() {
               prefix={"+62"}
             />
           </Form.Item>
-          <Form.Item
-            label="Nomor Kartu Keluarga"
-            name="kk"
-            className="md:w-7/12 w-full"
-          >
-            <Input
-              onKeyDown={(event) => {
-                if (!/[0-9]/.test(event.key)) {
-                  event.preventDefault();
-                }
-              }}
-            />
-          </Form.Item>
+          
           <Form.Item label="NIK" name="nik" className="md:w-7/12 w-full">
             <Input
               onKeyDown={(event) => {
@@ -250,20 +238,6 @@ export default function EditPatient() {
               <Select.Option value="budha">Budha</Select.Option>
               <Select.Option value="konghucu">Konghucu</Select.Option>
             </Select>
-          </Form.Item>
-          <Form.Item
-            label="Nama Ayah"
-            name="father_name"
-            className="md:w-7/12 w-full"
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Nama Ibu"
-            name="mother_name"
-            className="md:w-7/12 w-full"
-          >
-            <Input />
           </Form.Item>
           <Form.Item
             onKeyDown={(event) => {
