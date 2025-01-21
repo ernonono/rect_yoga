@@ -192,10 +192,14 @@ export default function EditProfileDoctor() {
     // });
 
     values.birthdate = dayjs(values.birthdate).format("YYYY-MM-DD");
-    values.education = values.education
-      ? JSON.stringify(values.education)
-      : null;
-    values.actions = values.actions ? JSON.stringify(values.actions) : null;
+    values.education =
+      typeof values.education === "string"
+        ? JSON.stringify(values.education)
+        : values?.education || [];
+    values.actions =
+      typeof values.actions === "string"
+        ? JSON.stringify(values.actions)
+        : values?.actions || [];
 
     if (image) {
       // handle upload later

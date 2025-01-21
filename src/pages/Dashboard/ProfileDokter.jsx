@@ -22,7 +22,10 @@ export default function ProfileDokter() {
     queryFn: async () => {
       const { data } = await instance.get(`/doctors/${id}`);
 
-      const education = JSON.parse(data?.education || []);
+      const education =
+        typeof data.education === "string"
+          ? JSON.parse(data.education)
+          : data?.education || [];
       setEducation(education);
 
       return data;
