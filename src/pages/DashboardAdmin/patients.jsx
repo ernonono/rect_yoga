@@ -1,4 +1,13 @@
-import { Card, Descriptions, Input, Modal, Typography, message } from "antd";
+import {
+  Card,
+  Descriptions,
+  Input,
+  Modal,
+  Switch,
+  Tooltip,
+  Typography,
+  message,
+} from "antd";
 import React, { useState } from "react";
 import {
   EditOutlined,
@@ -16,21 +25,21 @@ function PatientItem({ patient, onClick, refetch }) {
   const imgUrl = `http://localhost:8000/patient_image/${patient?.image}`;
   const mutation = useMutation({
     mutationFn: async () => {
-      await instance.delete(`patients/${patient.id}`);
+      await instance.put(`toggle-active`, { user_id: patient.user_id });
     },
     onError: (err, variables, context) => {
       setData(context);
     },
     onMutate: () => {
       message.loading({
-        content: "Menghapus pasien...",
+        content: "Mengubah status pasien...",
         key: "hapusPasien",
       });
     },
     onSuccess: () => {
       refetch();
       message.success({
-        content: "Berhasil menghapus pasien!",
+        content: "Berhasil mengubah status pasien!",
         key: "hapusPasien",
       });
     },
@@ -65,7 +74,7 @@ function PatientItem({ patient, onClick, refetch }) {
               <EditOutlined className="text-primary  text-lg cursor-pointer relative z-10" />
               <i className="absolute top-1/2 left-1/2 transform w-7 h-7 transition-all duration-100 rounded-full group-hover:bg-primary/20 z-0 -translate-x-1/2 -translate-y-1/2" />
             </div>
-            <div
+            {/* <div
               onClick={(e) => {
                 if (mutation.isPending) return;
 
@@ -76,12 +85,30 @@ function PatientItem({ patient, onClick, refetch }) {
             >
               <DeleteOutlined className="text-red-500 text-lg cursor-pointer" />
               <i className="absolute top-1/2 left-1/2 transform w-7 h-7 transition-all duration-100 rounded-full group-hover:bg-red-300/20 z-0 -translate-x-1/2 -translate-y-1/2" />
-            </div>
+            </div> */}
           </div>
         </div>
-        <Typography.Text className="text-[#AAAAAA] block -mt-3 mb-2">
-          Age: {calculateAge(patient?.birth)}
-        </Typography.Text>
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            // navigate(`/admin/patients/${patient.id}/edit`);
+          }}
+          className="w-full flex justify-between items-start"
+        >
+          <Typography.Text className="text-[#AAAAAA] block text-sm -mt-1">
+            Age: {calculateAge(patient?.birth)}
+          </Typography.Text>
+          <Tooltip title="Status Pasien">
+            <Switch
+              loading={mutation.isPending}
+              size="small"
+              checked={patient?.user?.is_active}
+              onChange={(e) => {
+                mutation.mutate();
+              }}
+            />
+          </Tooltip>
+        </div>
       </div>
     </div>
   );

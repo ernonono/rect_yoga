@@ -118,7 +118,7 @@ export default function UserProfile() {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="max-w-6xl mx-auto my-4">
         <Typography.Title className="text-[#767676] tracking-tight" level={2}>

@@ -106,13 +106,6 @@ function AddRekamMedis() {
                 <span className="font-medium min-w-[100px]">Phone</span>
                 <Typography.Text>: {data?.patient?.phone}</Typography.Text>
               </div>
-
-              <div className="flex gap-2">
-                <span className="font-medium min-w-[100px]">Age</span>
-                <Typography.Text>
-                  : {dayjs().diff(data?.patient?.birth, "year")} years
-                </Typography.Text>
-              </div>
             </Card>
 
             <Card className="w-1/2">

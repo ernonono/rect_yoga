@@ -1,9 +1,12 @@
 import {
+  Button,
   Card,
   Descriptions,
   Input,
   Modal,
   Select,
+  Switch,
+  Tooltip,
   Typography,
   message,
 } from "antd";
@@ -38,35 +41,33 @@ export function SocialMediaButton({ icon, link }) {
   );
 }
 
-function DoctorCard({ doctor, onClick, refetch }) {
+function DoctorCard({ doctor, refetch }) {
   const navigate = useNavigate();
   const imgUrl = `http://localhost:8000/doctor_image/${doctor?.image}`;
   const mutation = useMutation({
     mutationFn: async () => {
-      await instance.delete(`doctors/${doctor.id}`);
+      await instance.put(`toggle-active`, { user_id: doctor.user_id });
     },
     onError: (err, variables, context) => {
       setData(context);
     },
     onMutate: () => {
       message.loading({
-        content: "Menghapus dokter...",
-        key: "deleteDoctor",
+        content: "Mengubah status dokter...",
+        key: "hapusdokter",
       });
     },
     onSuccess: () => {
       refetch();
       message.success({
-        content: "Berhasil menghapus dokter!",
-        key: "deleteDoctor",
+        content: "Berhasil mengubah status dokter!",
+        key: "hapusdokter",
       });
     },
   });
 
   return (
     <Card
-      className="cursor-pointer"
-      onClick={() => onClick(doctor)}
       bordered={false}
       cover={
         <img
@@ -77,9 +78,23 @@ function DoctorCard({ doctor, onClick, refetch }) {
       }
     >
       <div>
-        <Typography.Title className="font-light text-primary" level={3}>
-          {doctor?.name}
-        </Typography.Title>
+        <div className="flex justify-between items-center">
+          <Typography.Title className="font-light text-primary" level={3}>
+            {doctor?.name}
+          </Typography.Title>
+          <Tooltip title="Edit dokter">
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/admin/doctors/${doctor.id}/edit`);
+              }}
+              className="relative group"
+            >
+              <EditOutlined className="text-primary  text-lg cursor-pointer relative z-10" />
+              <i className="absolute top-1/2 left-1/2 transform w-7 h-7 transition-all duration-100 rounded-full group-hover:bg-primary/20 z-0 -translate-x-1/2 -translate-y-1/2" />
+            </div>
+          </Tooltip>
+        </div>
         <Typography.Text className="text-[#AAAAAA] block -mt-3 mb-2">
           {doctor?.specialty}
         </Typography.Text>
@@ -114,28 +129,26 @@ function DoctorCard({ doctor, onClick, refetch }) {
         </div>
 
         <div className="flex gap-5">
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/admin/doctors/${doctor.id}/edit`);
-            }}
-            className="relative group"
-          >
-            <EditOutlined className="text-primary  text-lg cursor-pointer relative z-10" />
-            <i className="absolute top-1/2 left-1/2 transform w-7 h-7 transition-all duration-100 rounded-full group-hover:bg-primary/20 z-0 -translate-x-1/2 -translate-y-1/2" />
-          </div>
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              mutation.mutate();
-            }}
-            className="relative group"
-          >
-            <DeleteOutlined className="text-red-500 text-lg cursor-pointer" />
-            <i className="absolute top-1/2 left-1/2 transform w-7 h-7 transition-all duration-100 rounded-full group-hover:bg-red-300/20 z-0 -translate-x-1/2 -translate-y-1/2" />
-          </div>
+          <Tooltip title="Status dokter">
+            <Switch
+              loading={mutation.isPending}
+              size="small"
+              checked={doctor?.user?.is_active}
+              onChange={() => mutation.mutate()}
+            />
+          </Tooltip>
         </div>
       </div>
+
+      <Button
+        target="_blank"
+        href={`http://localhost:5173/profil-dokter/${doctor.id}`}
+        block
+        type="primary"
+        className="mt-3"
+      >
+        Lihat Profil
+      </Button>
     </Card>
   );
 }
@@ -147,7 +160,6 @@ function Loading() {
 }
 
 export default function DoctorList() {
-  const [selectedData, setSelectedData] = React.useState(null);
   const [filter, setFilter] = useState({
     name: "",
     poli_id: "",
@@ -182,45 +194,6 @@ export default function DoctorList() {
       [property]: value || "",
     });
   };
-
-  const descriptionItems = [
-    {
-      label: "Nama",
-      children: selectedData?.name,
-    },
-    {
-      label: "Spesialis",
-      children: selectedData?.specialty,
-    },
-    {
-      label: "Poli",
-      children: selectedData?.poli?.name,
-    },
-    {
-      label: "Email",
-      children: selectedData?.user?.email,
-    },
-    {
-      label: "Nomor Telepon",
-      children: selectedData?.phone_number,
-    },
-    {
-      label: "Alamat",
-      children: selectedData?.address,
-    },
-    {
-      label: "Pendidikan",
-      children: selectedData?.education && (
-        <ul>
-          {JSON.parse(selectedData?.education)?.map((item) => (
-            <li>
-              - {item.institution} ({item.start_year} - {item.end_year})
-            </li>
-          ))}
-        </ul>
-      ),
-    },
-  ];
 
   return (
     <div>
@@ -259,31 +232,10 @@ export default function DoctorList() {
           <Loading />
         ) : (
           data?.map((item) => (
-            <DoctorCard
-              onClick={(doctor) => setSelectedData(doctor)}
-              key={item.id}
-              refetch={refetch}
-              doctor={item}
-            />
+            <DoctorCard key={item.id} refetch={refetch} doctor={item} />
           ))
         )}
       </div>
-
-      <Modal
-        width={800}
-        title="Detail Doktor"
-        open={!!selectedData}
-        okButtonProps={{ hidden: true }}
-        cancelButtonProps={{ hidden: true }}
-        onCancel={() => setSelectedData(null)}
-      >
-        <Descriptions
-          bordered
-          column={1}
-          size="small"
-          items={descriptionItems}
-        />
-      </Modal>
     </div>
   );
 }

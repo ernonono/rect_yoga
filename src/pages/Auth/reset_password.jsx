@@ -1,80 +1,26 @@
-import { useRef, useState } from "react";
-import { EyeIcon, EyeSlashIcon, UserIcon } from "@heroicons/react/16/solid";
-import { useNavigate } from "react-router-dom";
+import React, { useRef, useState } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/16/solid";
 import Logo from "../../assets/ImageLogin.png";
 import Blob_1 from "../../assets/blob_1.png";
 import Blob_2 from "../../assets/blob_2.png";
+import { Button } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import { toast } from "react-toastify";
-import { Button } from "antd";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-export default function Login() {
-  const toastId = useRef(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+export default function ResetPassword() {
   const navigate = useNavigate();
-  const mutation = useMutation({
-    mutationFn: (form) => {
-      return instance.post("/login", form);
-    },
-
-    onMutate: () => {
-      toastId.current = toast("Loading...", {
-        type: "info",
-        isLoading: true,
-      });
-    },
-
-    onSuccess: (res) => {
-      localStorage.setItem("token", res.data.access_token);
-      localStorage.setItem("user", JSON.stringify(res.data?.user || {}));
-      toast.update(toastId.current, {
-        render: "Login Success",
-        type: "success",
-        isLoading: false,
-        autoClose: 1500,
-      });
-
-      setTimeout(() => {
-        if (res.data?.user?.role === "admin") {
-          navigate("/admin");
-          return;
-        }
-
-        if (res.data?.user?.role === "doctor") {
-          navigate("/doctor");
-          return;
-        }
-
-        navigate("/beranda");
-      }, 1500);
-    },
-
-    onError: (error) => {
-      console.log(error);
-      toast.update(toastId.current, {
-        render: error?.response?.data?.message || "Login Failed",
-        type: "error",
-        isLoading: false,
-      });
-    },
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [params] = useSearchParams();
+  const [form, setForm] = useState({
+    password: "",
+    confirm_password: "",
+    email: params.get("email"),
+    token: params.get("token"),
   });
-
-  const togglePasswordVisibility = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
-  };
-
-  const handleRegisterClick = () => {
-    navigate("/register");
-  };
-
-  const handleLoginClick = () => {
-    mutation.mutate(form);
-  };
+  const toastId = useRef(null);
 
   const handleChange = (e) => {
     setForm((prevForm) => ({
@@ -82,6 +28,41 @@ export default function Login() {
       [e.target.name]: e.target.value,
     }));
   };
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      return instance.post("/reset-password", form);
+    },
+
+    onMutate: () => {
+      toastId.current = toast("Mengubah password...", {
+        type: "info",
+        isLoading: true,
+      });
+    },
+
+    onSuccess: () => {
+      toast.update(toastId.current, {
+        render: "Password berhasil diubah, silahkan login",
+        type: "success",
+        isLoading: false,
+        autoClose: 1500,
+      });
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    },
+
+    onError: (error) => {
+      console.log(error);
+      toast.update(toastId.current, {
+        render: error?.response?.data?.message || "Gagal mengubah password",
+        type: "error",
+        isLoading: false,
+      });
+    },
+  });
 
   return (
     <div className="flex relative justify-center items-center h-screen">
@@ -103,27 +84,8 @@ export default function Login() {
           </div>
           <div className="w-1/2 pl-4">
             <h1 className="text-[24px] font-medium mb-[24px] text-center">
-              Login to Your Account
+              Reset Password
             </h1>
-            <div className="mb-6 relative">
-              <label htmlFor="email" className="block mb-1 text-[14px]">
-                Email:
-              </label>
-              <div className="relative">
-                <input
-                  value={form.email}
-                  onChange={handleChange}
-                  type="email"
-                  id="email"
-                  name="email"
-                  className="w-full px-4 py-4 rounded-[15px] text-[14px] border border-[#BBBBBB] focus:outline-none focus:border-[#63A375]"
-                  placeholder="Enter Your Email"
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                  <UserIcon className="h-5 w-5" />
-                </div>
-              </div>
-            </div>
             <div className="mb-6 relative">
               <label htmlFor="password" className="block mb-1 text-[14px]">
                 Password:
@@ -140,7 +102,7 @@ export default function Login() {
                 />
                 <div
                   className="absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer"
-                  onClick={togglePasswordVisibility}
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="h-5 w-5" />
@@ -149,15 +111,31 @@ export default function Login() {
                   )}
                 </div>
               </div>
-
-              <div className="w-full flex justify-end">
-                <Button
-                  href="/send-reset-password"
-                  type="link"
-                  className="text-[#63A375] p-0 text-sm"
+            </div>
+            <div className="mb-6 relative">
+              <label htmlFor="password" className="block mb-1 text-[14px]">
+                Konfirmasi Password:
+              </label>
+              <div className="relative">
+                <input
+                  value={form.confirm_password}
+                  onChange={handleChange}
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="confirm_password"
+                  className="w-full px-4 py-4 rounded-[15px] text-[14px] border border-[#BBBBBB] focus:outline-none focus:border-[#63A375]"
+                  placeholder="Enter Your Confirmation Password"
+                />
+                <div
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  Forgot Password?
-                </Button>
+                  {showConfirmPassword ? (
+                    <EyeSlashIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </div>
               </div>
             </div>
             <div className="w-full flex justify-between">
@@ -168,19 +146,25 @@ export default function Login() {
                   block
                   type="primary"
                   className=""
-                  onClick={handleLoginClick}
+                  onClick={() => {
+                    if (form.password !== form.confirm_password) {
+                      toast("Password tidak sama", { type: "error" });
+                      return;
+                    }
+
+                    mutation.mutate();
+                  }}
                 >
-                  {mutation.isPending ? "Loading..." : "Login"}
+                  {mutation.isPending ? "Loading..." : "Submit"}
                 </Button>
               </div>
             </div>
-            <p
-              className="text-center text-gray-500 text-sm cursor-pointer"
-              onClick={handleRegisterClick}
-            >
-              Don't have an account?
-              <span className="text-[#63A375]"> Register Here</span>
-            </p>
+
+            <div className="flex justify-center">
+              <Button href="/login" type="link" className="text-sm">
+                Back to Login
+              </Button>
+            </div>
           </div>
         </div>
       </div>

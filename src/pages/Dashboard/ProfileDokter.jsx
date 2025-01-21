@@ -33,9 +33,11 @@ export default function ProfileDokter() {
     <div>
       <Navbar />
       {isLoading ? (
-        <Skeleton.Node active className="w-full h-[500px]">
-          {" "}
-        </Skeleton.Node>
+        <div className="max-w-6xl mx-auto mt-6">
+          <Skeleton.Node active className="w-full h-[700px]">
+            {" "}
+          </Skeleton.Node>
+        </div>
       ) : (
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-4 mt-6">
           <div className="w-full md:w-1/4 flex flex-col items-center">

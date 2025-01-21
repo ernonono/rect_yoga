@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import LoggedGuard from "../components/LoggedGuard";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
+import SendEmailForgotPassword from "../pages/Auth/send_email_forgot";
+import ResetPassword from "../pages/Auth/reset_password";
 
 function AuthRoutes() {
   return (
@@ -21,6 +23,22 @@ function AuthRoutes() {
         element={
           <LoggedGuard>
             <Register />
+          </LoggedGuard>
+        }
+      />
+      <Route
+        path="/send-reset-password"
+        element={
+          <LoggedGuard>
+            <SendEmailForgotPassword />
+          </LoggedGuard>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <LoggedGuard>
+            <ResetPassword />
           </LoggedGuard>
         }
       />

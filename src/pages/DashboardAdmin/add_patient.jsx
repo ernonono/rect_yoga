@@ -216,29 +216,6 @@ export default function AddPatient() {
             />
           </Form.Item>
           <Form.Item
-            label="Nomor Kartu Keluarga"
-            name="kk"
-            rules={required}
-            className="md:w-7/12 w-full"
-          >
-            <Input
-              onKeyDown={(event) => {
-                // backspace, delete, arrow keys, tab, enter, etc
-                if (
-                  !/[0-9]/.test(event.key) &&
-                  event.key !== "Backspace" &&
-                  event.key !== "Delete" &&
-                  event.key !== "ArrowLeft" &&
-                  event.key !== "ArrowRight" &&
-                  event.key !== "Tab" &&
-                  event.key !== "Enter"
-                ) {
-                  event.preventDefault();
-                }
-              }}
-            />
-          </Form.Item>
-          <Form.Item
             rules={required}
             label="NIK"
             name="nik"
@@ -283,20 +260,6 @@ export default function AddPatient() {
               <Select.Option value="budha">Budha</Select.Option>
               <Select.Option value="konghucu">Konghucu</Select.Option>
             </Select>
-          </Form.Item>
-          <Form.Item
-            label="Nama Ayah"
-            name="father_name"
-            className="md:w-7/12 w-full"
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Nama Ibu"
-            name="mother_name"
-            className="md:w-7/12 w-full"
-          >
-            <Input />
           </Form.Item>
           <Form.Item
             onKeyDown={(event) => {
