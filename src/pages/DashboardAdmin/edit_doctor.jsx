@@ -57,14 +57,14 @@ export default function EditDoctor() {
         ...data,
         birthdate: data?.birthdate ? dayjs(data.birthdate) : null,
         email: data.user.email,
-        actions: data?.actions ? JSON.parse(data.actions) : null,
-        education: data?.education
+        actions: typeof data?.actions === "string" ? JSON.parse(data.actions) : data?.actions || [] ,
+        education: typeof data?.education === "string"
           ? JSON.parse(data.education).map((item) => ({
               ...item,
               start_year: dayjs(item.start_year),
               end_year: dayjs(item.end_year),
             }))
-          : null,
+          : data?.education || [],
       });
 
       if (data.image) {
