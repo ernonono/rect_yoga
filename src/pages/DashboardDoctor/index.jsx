@@ -131,7 +131,7 @@ function DashboardDoctor() {
     };
 
     return data?.length > 0 ? (
-      <div className="events">
+      <div className="events flex flex-col gap-2">
         {data.map((item) => (
           <Popover
             key={item.id}
@@ -144,7 +144,7 @@ function DashboardDoctor() {
 
                 navigate(`/doctor/appointments?identifier=${item.id}`);
               }}
-              className={`${item.type === "agenda" ? "bg-orange-400" : "bg-primary"} px-2 text-white rounded-md`}
+              className={`${item.type === "agenda" ? "bg-orange-400" : "bg-primary"} px-2 text-white rounded-md text-xs`}
             >
               <div className="font-bold">
                 {dayjs(item?.appointment_date).format("HH:mm")}
