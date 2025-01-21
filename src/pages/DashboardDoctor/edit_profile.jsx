@@ -55,7 +55,7 @@ export default function EditProfileDoctor() {
       // set form values
       form.setFieldsValue({
         ...doctor,
-        birthdate: doctor?.birthdate ? dayjs(doctor.birthdate) : null,
+        birthdate: doctor?.birthdate ? dayjs(doctor.birthdate) : dayjs(),
         email: data.email,
         actions: typeof doctor?.actions === "string" ? JSON.parse(doctor.actions) : data?.actions || [],
         education: typeof doctor?.education === "string"
