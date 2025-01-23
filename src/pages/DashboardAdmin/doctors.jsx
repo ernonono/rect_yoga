@@ -25,6 +25,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
 import { parseParams } from "../../utils/parseParams";
+import DoctorProfileModal from "../../components/DoctorProfileModal";
 
 export function SocialMediaButton({ icon, link }) {
   return (
@@ -41,7 +42,7 @@ export function SocialMediaButton({ icon, link }) {
   );
 }
 
-function DoctorCard({ doctor, refetch }) {
+function DoctorCard({ doctor, refetch, openModal }) {
   const navigate = useNavigate();
   const imgUrl = `http://localhost:8000/doctor_image/${doctor?.image}`;
   const mutation = useMutation({
@@ -141,8 +142,7 @@ function DoctorCard({ doctor, refetch }) {
       </div>
 
       <Button
-        target="_blank"
-        href={`http://localhost:5173/profil-dokter/${doctor.id}`}
+        onClick={() => openModal(doctor.id)}
         block
         type="primary"
         className="mt-3"
@@ -165,6 +165,7 @@ export default function DoctorList() {
     poli_id: "",
     specialty: "",
   });
+  const [doctorId, setDoctorId] = useState(null);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["doctor-list", filter],
     queryFn: async () => {
@@ -232,10 +233,20 @@ export default function DoctorList() {
           <Loading />
         ) : (
           data?.map((item) => (
-            <DoctorCard key={item.id} refetch={refetch} doctor={item} />
+            <DoctorCard
+              openModal={(id) => setDoctorId(id)}
+              key={item.id}
+              refetch={refetch}
+              doctor={item}
+            />
           ))
         )}
       </div>
+
+      <DoctorProfileModal
+        doctor_id={doctorId}
+        onCancel={() => setDoctorId(null)}
+      />
     </div>
   );
 }

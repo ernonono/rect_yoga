@@ -52,19 +52,26 @@ export default function EditProfileDoctor() {
     if (dataDoctor) {
       const data = dataDoctor;
       const doctor = data.doctor;
+
+      const education =
+        typeof doctor?.education === "string"
+          ? JSON.parse(doctor.education)
+          : doctor?.education || [];
+
       // set form values
       form.setFieldsValue({
         ...doctor,
         birthdate: doctor?.birthdate ? dayjs(doctor.birthdate) : dayjs(),
         email: data.email,
-        actions: typeof doctor?.actions === "string" ? JSON.parse(doctor.actions) : data?.actions || [],
-        education: typeof doctor?.education === "string"
-          ? JSON.parse(doctor.education).map((item) => ({
-              ...item,
-              start_year: dayjs(item.start_year),
-              end_year: dayjs(item.end_year),
-            }))
-          : doctor?.education || [],
+        actions:
+          typeof doctor?.actions === "string"
+            ? JSON.parse(doctor.actions)
+            : data?.actions || [],
+        education: education.map((item) => ({
+          ...item,
+          start_year: dayjs(item.start_year),
+          end_year: dayjs(item.end_year),
+        })),
       });
 
       if (doctor.image) {

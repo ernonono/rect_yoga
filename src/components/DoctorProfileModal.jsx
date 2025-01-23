@@ -1,9 +1,6 @@
 import React from "react";
-import Navbar from "../../components/Navbar";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
-import { Avatar, Card, Divider, List, Skeleton, Typography } from "antd";
-import { SocialMediaButton } from "../DashboardAdmin/doctors";
+import { Avatar, Card, Divider, List, Modal, Skeleton, Typography } from "antd";
 import {
   FacebookOutlined,
   GooglePlusOutlined,
@@ -12,11 +9,11 @@ import {
   XOutlined,
   HomeFilled,
 } from "@ant-design/icons";
-import instance from "../../utils/axios";
+import { SocialMediaButton } from "../pages/DashboardAdmin/doctors";
+import instance from "../utils/axios";
 
-export default function ProfileDokter() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const { id } = useParams();
+export default function DoctorProfileModal({ doctor_id, onCancel }) {
+  const id = doctor_id;
   const [education, setEducation] = React.useState([]);
   const { data, isLoading } = useQuery({
     queryKey: ["doctor", id],
@@ -34,10 +31,20 @@ export default function ProfileDokter() {
   });
 
   return (
-    <div>
-      {user.role === "patient" && <Navbar />}
+    <Modal
+      title="Doctor Profile"
+      open={!!doctor_id}
+      okButtonProps={{
+        style: { display: "none" },
+      }}
+      centered
+      width={1200}
+      cancelText="Close"
+      onCancel={onCancel}
+      onClose={onCancel}
+    >
       {isLoading ? (
-        <div className="max-w-6xl mx-auto mt-6">
+        <div className="max-w-5xl mx-auto mt-6">
           <Skeleton.Node active className="w-full h-[700px]">
             {" "}
           </Skeleton.Node>
@@ -141,6 +148,6 @@ export default function ProfileDokter() {
           </Card>
         </div>
       )}
-    </div>
+    </Modal>
   );
 }

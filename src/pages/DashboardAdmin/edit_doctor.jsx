@@ -52,19 +52,24 @@ export default function EditDoctor() {
   useEffect(() => {
     if (dataDoctor) {
       const data = dataDoctor;
+      const education =
+        typeof data?.education === "string"
+          ? JSON.parse(data.education)
+          : data?.education || [];
       // set form values
       form.setFieldsValue({
         ...data,
         birthdate: data?.birthdate ? dayjs(data.birthdate) : dayjs(),
         email: data.user.email,
-        actions: typeof data?.actions === "string" ? JSON.parse(data.actions) : data?.actions || [] ,
-        education: typeof data?.education === "string"
-          ? JSON.parse(data.education).map((item) => ({
-              ...item,
-              start_year: dayjs(item.start_year),
-              end_year: dayjs(item.end_year),
-            }))
-          : data?.education || [],
+        actions:
+          typeof data?.actions === "string"
+            ? JSON.parse(data.actions)
+            : data?.actions || [],
+        education: education.map((item) => ({
+          ...item,
+          start_year: dayjs(item.start_year),
+          end_year: dayjs(item.end_year),
+        })),
       });
 
       if (data.image) {
@@ -73,6 +78,8 @@ export default function EditDoctor() {
       }
     }
   }, [dataDoctor]);
+
+  console.log(form.getFieldsValue());
 
   const uploadProps = {
     name: "file",
@@ -410,6 +417,13 @@ export default function EditDoctor() {
               optionFilterProp="label"
               options={actionsOptions}
             />
+          </Form.Item>
+          <Form.Item
+            label="Kuota Pasien"
+            name="quota"
+            className="md:w-7/12 w-full"
+          >
+            <Input type="number" />
           </Form.Item>
         </Card>
 

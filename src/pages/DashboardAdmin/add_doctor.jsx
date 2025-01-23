@@ -11,7 +11,7 @@ import {
   message,
 } from "antd";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   InboxOutlined,
   MinusCircleOutlined,
@@ -65,6 +65,17 @@ export default function AddDoctor() {
       );
     },
   });
+
+  useEffect(() => {
+    form.setFieldsValue({
+      quota: [
+        {
+          day: "Senin",
+          quota: 10,
+        },
+      ],
+    });
+  }, []);
 
   const profesiOptions = [
     {
