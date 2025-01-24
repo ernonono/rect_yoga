@@ -35,10 +35,10 @@ const CardData = ({ data, onRM }) => (
       <div className="flex flex-col ">
         <div>
           <Typography.Title className="m-0" level={4}>
-            {abbreviate(data.patient.name)}
+            {abbreviate(data?.patient?.name)}
           </Typography.Title>
           <Typography.Text className="uppercase text-[#D6DADF] font-bold">
-            {data.doctor.poli.name}
+            {data?.doctor?.poli?.name || "Umum"}
           </Typography.Text>
         </div>
 
@@ -46,13 +46,13 @@ const CardData = ({ data, onRM }) => (
           <div className="flex gap-2">
             <span className="min-w-[100px]">Jenis Kelamin</span>
             <span>
-              : <b>{data.patient.gender}</b>
+              : <b>{data?.patient?.gender}</b>
             </span>
           </div>
           <div className="flex gap-2">
             <span className="min-w-[100px]">Telfon</span>
             <span>
-              : <b>{data.patient.phone}</b>
+              : <b>{data?.patient?.phone}</b>
             </span>
           </div>
           <div className="flex gap-2">

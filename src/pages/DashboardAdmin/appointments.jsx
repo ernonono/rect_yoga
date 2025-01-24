@@ -66,7 +66,7 @@ const CardData = ({ data, onClick, onRM }) => (
       <div className="flex flex-col justify-center items-center">
         <Avatar className="bg-primary" size={65} icon={<UserOutlined />} />
         <Typography.Title className="m-0" level={4}>
-          {abbreviate(data.patient.name)}
+          {abbreviate(data?.patient?.name)}
         </Typography.Title>
       </div>
       <div className="flex flex-col justify-between items-end">

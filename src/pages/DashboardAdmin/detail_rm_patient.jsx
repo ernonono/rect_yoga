@@ -79,7 +79,7 @@ export default function DetailRMPatient() {
       ),
     },
     {
-      title: "KONSUMSI OBAT",
+      title: "CATATAN DOKTER",
       align: "center",
       key: "konsumsi_obat",
       render: (_, record) => {
@@ -94,6 +94,24 @@ export default function DetailRMPatient() {
             ))}
           </div>
         );
+      },
+    },
+    {
+      title: "OBAT",
+      align: "center",
+      key: "durg_code",
+      width: "20%",
+      render: (_, record) => {
+        const obat =
+          typeof record?.drug_code === "string"
+            ? JSON.parse(record?.drug_code)
+            : record.drug_code;
+
+        return obat.map((item, index) => (
+          <Tag key={index} color="green" className="font-light text-xs">
+            {item?.name} ({item?.code})
+          </Tag>
+        ));
       },
     },
   ];
@@ -117,10 +135,10 @@ export default function DetailRMPatient() {
           },
           body: { padding: "1.6rem" },
         }}
-        title="Profile"
+        title="DATA PASIEN"
       >
         <div className="w-full flex h-full">
-          <div className="border-r w-[30%] border-[#96969E] flex flex-col gap-2 items-center">
+          <div className="border-r w-[30%] border-[#E8E8E8] flex flex-col gap-2 items-center">
             <Avatar
               size={120}
               src={`http://localhost:8000/patient_image/${data?.patient?.image}`}
