@@ -5,6 +5,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import instance from "../../utils/axios";
 import dayjs from "dayjs";
 
+
+
+
 import "dayjs/locale/id";
 import {
   Button,
@@ -187,7 +190,9 @@ export default function Riwayat() {
   const [registrationId, setRegistrationId] = useState(null);
   const [dataRM, setDataRM] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState([]);
+  const [dataBelumSelesai, setDataBelumSelesai] = useState([]);
+  const [dataSelesai, setDataSelesai] = useState([]);
+  const [dataBatal, setDataBatal] = useState([]);
 
   const handleViewRM = (id) => {
     setParams({ identifier: id });
@@ -196,10 +201,15 @@ export default function Riwayat() {
   const fetchRegistration = async () => {
     try {
       const { data } = await instance.get("/registrations");
-      setData(data);
+      console.log('Data dari API:', data);
+      setDataBelumSelesai(data.belum_selesai);
+      setDataSelesai(data.selesai);
+      setDataBatal(data.dibatalkan)
       setIsLoading(false);
     } catch (error) {
-      setData([]);
+      setDataBelumSelesai([]);
+      setDataSelesai([]);
+      setDataBatal([]);
       console.log(error);
     }
   };
@@ -218,8 +228,8 @@ export default function Riwayat() {
   }, [params]);
 
   useEffect(() => {
-    if (registrationId && data) {
-      const regis = data.find(
+    if (registrationId && dataBelumSelesai) {
+      const regis = dataBelumSelesai.find(
         (item) => item.id === parseInt(registrationId || "0"),
       );
       const rm = regis?.medical_records || [];
@@ -229,7 +239,37 @@ export default function Riwayat() {
         rm,
       });
     }
-  }, [registrationId, data]);
+    if (registrationId && dataSelesai) {
+      const regis = dataSelesai.find(
+        (item) => item.id === parseInt(registrationId || "0"),
+      );
+      const rm = regis?.medical_records || [];
+
+      setDataRM({
+        registration: regis,
+        rm,
+      });
+    }
+  }, [registrationId, dataBelumSelesai, dataSelesai,]);
+
+  const handleCancel = async (id) => {
+    if (!window.confirm('Yakin ingin membatalkan pendaftaran ini?')) return;
+    try {
+      const { data } = await instance.delete(`/registrations/${id}`);
+      alert(data.message);
+      await fetchRegistration();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Gagal membatalkan.');
+    }
+  };
+
+  useEffect(() => {
+    fetchRegistration();
+  }, []);
+  
+  
+  
 
   return (
     <div className="relative">
@@ -237,13 +277,18 @@ export default function Riwayat() {
       {/* <Banner /> */}
       <div className="pb-18 mt-10 text-center">
         <div className="font-black text-[#ADCEB7] text-[96px]">RIWAYAT</div>
+
+        <div className="font-black text-left text-[#ADCEB7] text-[48px] mx-16">Belum selesai</div>
         {isLoading ? (
           "Loading..."
         ) : (
-          <div className="grid grid-cols-2 gap-8 pb-28">
-            {data?.map((item) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-16 pb-28 justify-start">
+            {dataBelumSelesai?.map((item) => (
+              <div
+              key={item.id}
+              className="rounded-xl border border-gray-200 shadow-md min-h-[100px] w-[428px] overflow-hidden">
               <div className="flex flex-col items-center mx-10">
-                <div className="bg-[#63A375] p-4  border-gray-200 shadow-md min-h-[200px] w-[600px] flex items-center text-left justify-left">
+                <div className="bg-[#ffb627] p-4  border-gray-200 shadow-md min-h-200px] w-[428px] flex items-center text-left justify-left">
                   <div className="text-white">
                     <p className="font-semibold">Hari</p>
                     <p className="text-sm">
@@ -261,12 +306,21 @@ export default function Riwayat() {
                 </div>
                 <div
                   onClick={() => handleViewRM(item.id)}
-                  className="bg-white p-4 w-[600px] cursor-pointer border-gray-200 shadow-md"
+                  className="bg-white p-4 w-[428px] cursor-pointer border-gray-200 shadow-md "
                 >
                   <span className="text-[#63A375]  ">
                     Lihat rekam medis ({item?.medical_records?.length || 0})
                   </span>
                 </div>
+                <div
+                  onClick={() => handleCancel(item.id)}
+                  className="bg-[#ffb627] hover:bg-yellow-600  p-4 w-[428px] cursor-pointer border-gray-200 shadow-md"
+                >
+                  <span className="text-white ">
+                    Batal Daftar
+                  </span>
+                </div>
+              </div>
               </div>
             ))}
 
@@ -289,6 +343,124 @@ export default function Riwayat() {
             </Drawer>
           </div>
         )}
+
+        <div className="font-black text-left text-[#ADCEB7] text-[48px] mx-16">Selesai</div>
+        {isLoading ? (
+          "Loading..."
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-16 pb-28 justify-start">
+            {dataSelesai?.map((item) => (
+              <div
+              key={item.id}
+              className="rounded-xl border border-gray-200 shadow-md min-h-[200px] w-[428px] overflow-hidden">
+              <div className="flex flex-col items-center mx-10" >
+                <div className="bg-[#63A375] p-4  border-gray-200 shadow-md min-h-[200px] w-[428px] flex items-center text-left justify-left">
+                  <div className="text-white">
+                    <p className="font-semibold">Hari</p>
+                    <p className="text-sm">
+                      {dayjs(item?.appointment_date).format(
+                        "dddd, DD MMMM YYYY",
+                      )}
+                    </p>
+                    <p className="mt-4 font-semibold">Poli</p>
+                    <p className="text-sm">{item?.doctor?.poli?.name}</p>
+                    <p className="mt-2 font-semibold">Dokter</p>
+                    <p className="text-sm">{item?.doctor?.name}</p>
+                    <p className="mt-2 font-semibold">Status</p>
+                    <p className="text-sm">{item?.status}</p>
+                  </div>
+                </div>
+                <div
+                  onClick={() => handleViewRM(item.id)}
+                  className="bg-white p-4 w-[428px] cursor-pointer border-gray-200 shadow-md"
+                >
+                  <span className="text-[#63A375]  ">
+                    Lihat rekam medis ({item?.medical_records?.length || 0})
+                  </span>
+                </div>
+              </div>
+              </div>
+            ))}
+
+            <Drawer
+              title="Riwayat Rekam Medis"
+              placement="right"
+              width={500}
+              closable={false}
+              onClose={() => setParams({})}
+              open={!!registrationId}
+            >
+              {dataRM?.rm?.length > 0 ? (
+                <MedicalRecordTimeline data={dataRM} />
+              ) : (
+                <p>
+                  No medical records found. Please wait for your medical
+                  records.
+                </p>
+              )}
+            </Drawer>
+          </div>
+        )}
+
+<div className="font-black text-left text-[#ADCEB7] text-[48px] mx-16">Dibatalkan</div>
+        {isLoading ? (
+          "Loading..."
+        ) : (
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-16 pb-28 justify-start">
+            {dataBatal?.map((item, index) => (
+              <div
+              key={item.id}
+              className="rounded-xl border border-gray-200 shadow-md min-h-[200px] w-[428px] overflow-hidden">
+              <div className="flex flex-col items-center mx-10" >
+                <div className="bg-[#c3423f] p-4  border-gray-200 shadow-md min-h-[200px] w-[428px] flex items-center text-left justify-start">
+                  <div className="text-white">
+                    <p className="font-semibold">Hari</p>
+                    <p className="text-sm">
+                      {dayjs(item?.appointment_date).format(
+                        "dddd, DD MMMM YYYY",
+                      )}
+                    </p>
+                    <p className="mt-4 font-semibold">Poli</p>
+                    <p className="text-sm">{item?.doctor?.poli?.name}</p>
+                    <p className="mt-2 font-semibold">Dokter</p>
+                    <p className="text-sm">{item?.doctor?.name}</p>
+                    <p className="mt-2 font-semibold">Status</p>
+                    <p className="text-sm">{item?.status}</p>
+                  </div>
+                </div>
+                <div
+                  onClick={() => handleViewRM(item.id)}
+                  className="bg-white p-4 w-[428px] cursor-pointer border-gray-200 shadow-md"
+                >
+                  <span className="text-[#63A375]  ">
+                    Lihat rekam medis ({item?.medical_records?.length || 0})
+                  </span>
+                </div>
+              </div>
+              </div>
+            ))}
+
+            <Drawer
+              title="Riwayat Rekam Medis"
+              placement="right"
+              width={500}
+              closable={false}
+              onClose={() => setParams({})}
+              open={!!registrationId}
+            >
+              {dataRM?.rm?.length > 0 ? (
+                <MedicalRecordTimeline data={dataRM} />
+              ) : (
+                <p>
+                  No medical records found. Please wait for your medical
+                  records.
+                </p>
+              )}
+            </Drawer>
+          </div>
+        )}
+
       </div>
     </div>
   );

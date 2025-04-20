@@ -50,8 +50,12 @@ export default function Konfirmasi() {
       navigate("/riwayat");
     },
 
-    onError: () => {
-      toast("Gagal melakukan registrasi, harap cek kembali data anda.", {
+    onError: (error) => {
+      let message = "Gagal melakukan registrasi, harap cek kembali data anda.";
+      if (error.status === 400) {
+        message = error.response?.data?.error_message;
+      }
+      toast(message, {
         type: "error",
       });
     },
