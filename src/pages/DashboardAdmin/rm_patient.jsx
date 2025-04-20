@@ -6,7 +6,7 @@ import { UserOutlined, FileTextOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const abbreviate = (name) => {
+const abbreviate = (name = "") => {
   const firstName = name.split(" ")[0];
   const lastNames = name
     .split(" ")
