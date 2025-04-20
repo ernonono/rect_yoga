@@ -7,6 +7,7 @@ import {
   Drawer,
   Form,
   Input,
+  Modal,
   Popover,
   Skeleton,
   Statistic,
@@ -14,7 +15,11 @@ import {
   Typography,
 } from "antd";
 import React, { useState } from "react";
-import { CalendarOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CalendarOutlined,
+  PlusOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import dayjs from "dayjs";
@@ -27,6 +32,9 @@ function DashboardDoctor() {
   const loggedinDoktor = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [openModalExport, setOpenModalExport] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["doctor-registration"],
     queryFn: async () => {
@@ -100,9 +108,7 @@ function DashboardDoctor() {
               {
                 label: "Status",
                 children: (
-                  <Tag
-                    color={data.status === "Belum Selesai" ? "red" : "green"}
-                  >
+                  <Tag color={data.status === "Selesai" ? "green" : "red"}>
                     {data.status}
                   </Tag>
                 ),
@@ -193,33 +199,62 @@ function DashboardDoctor() {
     });
   };
 
+  const handleDownloadData = async () => {
+    try {
+      const response = await instance.get(
+        `/registrations-summary?start_date=${startDate}&end_date=${endDate}&doctor_id=${loggedinDoktor.doctor_id}`,
+        {
+          responseType: "blob",
+        },
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "rekap_data_pasien.xlsx");
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      toast.error("Gagal mendownload data pasien");
+    }
+  };
+
   return (
     <div>
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
         DASHBOARD
       </Typography.Title>
 
-      <div className="w-full flex justify-start items-center gap-7 mb-6">
-        <Card className="min-w-[250px]">
-          <Statistic
-            loading={isLoading}
-            title="Total Registration"
-            precision={0}
-            value={data?.filter((item) => item.type === "appointment").length}
-            valueStyle={{ color: "#3f8600" }}
-            prefix={<CalendarOutlined />}
-          />
-        </Card>
-        <Card className="min-w-[250px]">
-          <Statistic
-            loading={isLoading}
-            title="Total Agenda"
-            precision={0}
-            value={data?.filter((item) => item.type === "agenda").length}
-            valueStyle={{ color: "#3f8600" }}
-            prefix={<CalendarOutlined />}
-          />
-        </Card>
+      <div className="flex justify-between">
+        <div className="w-full flex justify-start items-center gap-7 mb-6">
+          <Card className="min-w-[250px]">
+            <Statistic
+              loading={isLoading}
+              title="Total Registration"
+              precision={0}
+              value={data?.filter((item) => item.type === "appointment").length}
+              valueStyle={{ color: "#3f8600" }}
+              prefix={<CalendarOutlined />}
+            />
+          </Card>
+          <Card className="min-w-[250px]">
+            <Statistic
+              loading={isLoading}
+              title="Total Agenda"
+              precision={0}
+              value={data?.filter((item) => item.type === "agenda").length}
+              valueStyle={{ color: "#3f8600" }}
+              prefix={<CalendarOutlined />}
+            />
+          </Card>
+        </div>
+        <Button
+          onClick={() => setOpenModalExport(true)}
+          type="primary"
+          icon={<DownloadOutlined />}
+        >
+          Download Rekap Data Pasien
+        </Button>
       </div>
 
       {isLoading ? <Skeleton active /> : <Calendar cellRender={cellRender} />}
@@ -248,6 +283,36 @@ function DashboardDoctor() {
           </Button>
         </Form>
       </Drawer>
+
+      <Modal
+        title="Download Rekap Data Pasien"
+        open={openModalExport}
+        onCancel={() => setOpenModalExport(false)}
+        footer={
+          <>
+            <Button
+              disabled={!startDate || !endDate}
+              type="primary"
+              onClick={handleDownloadData}
+            >
+              Download
+            </Button>
+          </>
+        }
+        width={800}
+        centered
+      >
+        <label className="text-sm font-semibold">Pilih Bulan dan Tahun</label>
+        <DatePicker.RangePicker
+          picker="month"
+          className="w-full mt-1"
+          format="MM YYYY"
+          onChange={(date) => {
+            setStartDate(date[0]?.format("YYYY-MM-DD"));
+            setEndDate(date[1]?.format("YYYY-MM-DD"));
+          }}
+        />
+      </Modal>
     </div>
   );
 }

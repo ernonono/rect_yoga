@@ -10,6 +10,7 @@ import {
   List,
   Modal,
   Skeleton,
+  Tag,
   Timeline,
   Tooltip,
   Typography,
@@ -51,6 +52,19 @@ const SkeletonCards = () => (
   </div>
 );
 
+const getTagColor = (status) => {
+  switch (status) {
+    case "Belum Selesai":
+      return "yellow";
+    case "Selesai":
+      return "green";
+    case "Dibatalkan":
+      return "red";
+    default:
+      return "blue";
+  }
+};
+
 const CardData = ({ data, onClick, onRM }) => (
   <div className="bg-white flex flex-col justify-between min-h-[200px] p-5 rounded-lg shadow-md">
     <div className="flex justify-between">
@@ -61,10 +75,22 @@ const CardData = ({ data, onClick, onRM }) => (
         </Typography.Title>
       </div>
       <div className="flex flex-col justify-between items-end">
-        <Typography.Title level={5}>
-          {dayjs(data.appointment_date).format("DD MMMM YYYY")} |{" "}
-          {dayjs(data.appointment_date).format("HH:mm")}
-        </Typography.Title>
+        <div>
+          <div className="flex items-center mb-2">
+            <div className="w-6 h-6 bg-primary text-xs text-white rounded-full flex items-center justify-center mr-2">
+              #{data.queue_number}
+            </div>
+            <Typography.Title className="m-0" level={5}>
+              {dayjs(data.appointment_date).format("DD MMMM YYYY")} |{" "}
+              {dayjs(data.appointment_date).format("HH:mm")}
+            </Typography.Title>
+          </div>
+          <div className="flex justify-end">
+            <Tag className="m-0" color={getTagColor(data.status)}>
+              {data.status}
+            </Tag>
+          </div>
+        </div>
         <Typography.Text className="uppercase text-[#D6DADF] text-xl font-bold">
           {data.doctor.poli.name}
         </Typography.Text>
@@ -83,6 +109,7 @@ const CardData = ({ data, onClick, onRM }) => (
       icon={<FileAddOutlined />}
       onClick={() => onClick(data.id)}
       block
+      disabled={data?.status === "Dibatalkan"}
       className="mt-5"
       type="primary"
     >

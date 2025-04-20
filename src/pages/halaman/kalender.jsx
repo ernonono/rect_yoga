@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 
 function PilihTanggal({ open, onClose, onFinish }) {
   const { tanggal, setTanggal, dokter_id } = useRegisterStore((state) => state);
-  const [time, setTime] = useState(tanggal ? dayjs(tanggal).hour() : 8);
+  const [time, setTime] = useState(tanggal ? dayjs(tanggal).hour() : null);
 
   const { data: quota, isLoading: quotaLoading } = useQuery({
     queryKey: ["quota", tanggal, dokter_id],
