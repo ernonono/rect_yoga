@@ -6,7 +6,7 @@ import instance from "../utils/axios";
 import { toast } from "react-toastify";
 
 export default function KalenderJanji() {
-  const [date, setDate] = useState(dayjs());
+  const [date, setDate] = useState(dayjs().startOf("day").add(2, "day"));
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState([]);
   const { setTanggal, dokter_id } = useRegisterStore((state) => state);
@@ -44,7 +44,7 @@ export default function KalenderJanji() {
     border: `1px solid rgb(240, 240, 240)`,
     borderRadius: 8,
   };
-
+  
   return (
     <div style={wrapperStyle}>
       {loading ? (
@@ -56,11 +56,11 @@ export default function KalenderJanji() {
       ) : (
         <Calendar
           className="rounded-lg"
-          validRange={[dayjs().startOf("day"), dayjs().add(365, "days")]}
+          validRange={[dayjs().startOf("days").add(2,"days"), dayjs().add(30, "days")]}
           disabledDate={(current) => {
             const found = registrations.find(
               (item) =>
-                dayjs(item.appointment_date).isSame(current, "day") &&
+                dayjs(item.appointment_date).isSame(current, "days") &&
                 item.type === "agenda",
             );
 
