@@ -431,7 +431,7 @@ export default function Riwayat() {
                 </div>
                 <div
                   
-                  className="bg-white p-4 w-full cursor-pointer border-gray-200 shadow-md"
+                  className="bg-white p-4 w-full border-gray-200 shadow-md"
                 >
                   <span className="text-[#63A375]">
                     Pendaftaran Dibatalkan
