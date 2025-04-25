@@ -286,9 +286,9 @@ export default function Riwayat() {
             {dataBelumSelesai?.map((item) => (
               <div
               key={item.id}
-              className="rounded-xl border border-gray-200 shadow-md min-h-[100px] w-[428px] overflow-hidden">
-              <div className="flex flex-col items-center mx-10">
-                <div className="bg-[#ffb627] p-4  border-gray-200 shadow-md min-h-200px] w-[428px] flex items-center text-left justify-left">
+              className=" rounded-xl border border-gray-200 shadow-md min-h-[100px] w-full max-w-[428px] overflow-hidden">
+              <div className="flex flex-col items-center">
+                <div className="bg-[#ffb627] p-4 border-gray-200 shadow-md w-full flex text-left justify-start relative">
                   <div className="text-white">
                     <p className="font-semibold">Hari</p>
                     <p className="text-sm">
@@ -306,7 +306,7 @@ export default function Riwayat() {
                 </div>
                 <div
                   onClick={() => handleViewRM(item.id)}
-                  className="bg-white p-4 w-[428px] cursor-pointer border-gray-200 shadow-md "
+                  className="bg-white p-4 w-full cursor-pointer border-gray-200 shadow-md "
                 >
                   <span className="text-[#63A375]  ">
                     Lihat rekam medis ({item?.medical_records?.length || 0})
@@ -314,7 +314,7 @@ export default function Riwayat() {
                 </div>
                 <div
                   onClick={() => handleCancel(item.id)}
-                  className="bg-[#ffb627] hover:bg-yellow-600  p-4 w-[428px] cursor-pointer border-gray-200 shadow-md"
+                  className="bg-[#ffb627] hover:bg-yellow-600  p-4 w-full cursor-pointer border-gray-200 shadow-md"
                 >
                   <span className="text-white ">
                     Batal Daftar
@@ -352,9 +352,9 @@ export default function Riwayat() {
             {dataSelesai?.map((item) => (
               <div
               key={item.id}
-              className="rounded-xl border border-gray-200 shadow-md min-h-[200px] w-[428px] overflow-hidden">
-              <div className="flex flex-col items-center mx-10" >
-                <div className="bg-[#63A375] p-4  border-gray-200 shadow-md min-h-[200px] w-[428px] flex items-center text-left justify-left">
+              className="rounded-xl border border-gray-200 shadow-md min-h-[200px] w-full max-w-[428px] overflow-hidden">
+              <div className="flex flex-col items-center" >
+                <div className="bg-[#63A375] p-4 border-gray-200 shadow-md w-full flex text-left justify-start relative">
                   <div className="text-white">
                     <p className="font-semibold">Hari</p>
                     <p className="text-sm">
@@ -372,7 +372,7 @@ export default function Riwayat() {
                 </div>
                 <div
                   onClick={() => handleViewRM(item.id)}
-                  className="bg-white p-4 w-[428px] cursor-pointer border-gray-200 shadow-md"
+                  className="bg-white p-4 w-full cursor-pointer border-gray-200 shadow-md"
                 >
                   <span className="text-[#63A375]  ">
                     Lihat rekam medis ({item?.medical_records?.length || 0})
@@ -411,9 +411,9 @@ export default function Riwayat() {
             {dataBatal?.map((item, index) => (
               <div
               key={item.id}
-              className="rounded-xl border border-gray-200 shadow-md min-h-[200px] w-[428px] overflow-hidden">
-              <div className="flex flex-col items-center mx-10" >
-                <div className="bg-[#c3423f] p-4  border-gray-200 shadow-md min-h-[200px] w-[428px] flex items-center text-left justify-start">
+              className="rounded-xl border border-gray-200 shadow-md min-h-[200px] w-full max-w-[428px] overflow-hidden">
+              <div className="flex flex-col items-center" >
+                <div className="bg-[#c3423f] p-4 border-gray-200 shadow-md w-full flex text-left justify-start relative">
                   <div className="text-white">
                     <p className="font-semibold">Hari</p>
                     <p className="text-sm">
@@ -430,11 +430,11 @@ export default function Riwayat() {
                   </div>
                 </div>
                 <div
-                  onClick={() => handleViewRM(item.id)}
-                  className="bg-white p-4 w-[428px] cursor-pointer border-gray-200 shadow-md"
+                  
+                  className="bg-white p-4 w-full cursor-pointer border-gray-200 shadow-md"
                 >
-                  <span className="text-[#63A375]  ">
-                    Lihat rekam medis ({item?.medical_records?.length || 0})
+                  <span className="text-[#63A375]">
+                    Pendaftaran Dibatalkan
                   </span>
                 </div>
               </div>
