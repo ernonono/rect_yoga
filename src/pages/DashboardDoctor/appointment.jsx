@@ -438,16 +438,28 @@ function DoctorAppointments() {
       {isLoading ? (
         <SkeletonCards />
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {data?.map((item) => (
-            <CardData
-              onClick={handleAddRM}
-              key={item.id}
-              data={item}
-              onRM={handleViewRM}
-            />
-          ))}
-        </div>
+        <div className="flex flex-col gap-10">
+        {["Belum Selesai", "Selesai", "Dibatalkan"].map((status) => (
+          <div key={status} className="pb-6 border-b border-gray-500 last:border-none">
+            <Typography.Title level={4} className="text-gray-500">
+              {status}
+            </Typography.Title>
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4 mt-2">
+              {data
+                ?.filter((item) => item.status === status)
+                .map((item) => (
+                  <CardData
+                    onClick={handleAddRM}
+                    key={item.id}
+                    data={item}
+                    onRM={handleViewRM}
+                  />
+                ))}
+            </div>
+          </div>
+        ))}
+      </div>
       )}
 
       <Drawer
