@@ -427,7 +427,7 @@ function DoctorAppointments() {
                 end_date: dayjs().format("YYYY-MM-DD"),
               });
             }}
-            type="text"
+            type="text" 
             className="text-xs text-gray-400"
           >
             Data hari ini

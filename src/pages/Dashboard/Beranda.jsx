@@ -6,11 +6,20 @@ import instance from "../../utils/axios";
 import { Card } from "antd";
 
 const VideoItem = ({ video }) => {
-  const videoUrl = `http://localhost:8000/healthcare_video/${video.video}`;
+  const videoUrl = video.video
+    ? `http://localhost:8000/healthcare_video/${video.video}`
+    : null;
+
   return (
     <Card title={video.title} className="cursor-pointer" bordered={false}>
       <div className="flex gap-6">
-        <video className="w-1/2 rounded-md" controls src={videoUrl} />
+        {videoUrl ? (
+          <video className="w-1/2 rounded-md" controls src={videoUrl} />
+        ) : (
+          <div className="w-1/2 flex items-center justify-center bg-gray-100 text-gray-500 rounded-md">
+            Tidak ada video
+          </div>
+        )}
 
         <div className="w-1/2">
           <p className="text-left">{video.description}</p>
@@ -25,7 +34,6 @@ export default function Beranda() {
     queryKey: ["healthcare-list"],
     queryFn: async () => {
       const { data } = await instance.get("healthcares");
-
       return data;
     },
   });

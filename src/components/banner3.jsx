@@ -14,8 +14,8 @@ export default function Banner() {
       <img src={Background} style={{ width: "100%", height: "750px" }} />
       <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
         <div className="w-1/2">
-          <h1 className="font-extrabold text-[40px] text-white">PENDAFTARAN</h1>
-          <h1 className="font-extrabold text-[40px] text-white">
+          <h1 className="font-extrabold text-[70px] text-white">PENDAFTARAN</h1>
+          <h1 className="font-extrabold text-[70px] text-white">
             ONLINE RS LOREM
           </h1>
           <p className="font-light text-[24px] text-white">
