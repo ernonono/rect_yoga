@@ -13,7 +13,9 @@ function PembayaranCard() {
         if (!user.patient?.bpjs) return;
         setTipe_pembayaran("BPJS");
       }}
-      className={`w-[342px] pb-4 mt-16 relative flex flex-col items-center  ${tipe_pembayaran === "BPJS" ? "bg-[#63A375] text-white cursor-pointer" : !user.patient?.bpjs ? "bg-gray-200 text-gray-500" : "bg-white cursor-pointer text-black"} shadow-lg rounded-2xl`}
+      className={`w-[342px] pb-4 mt-16 relative flex flex-col items-center  
+      ${tipe_pembayaran === "BPJS" ? "bg-[#63A375] text-white cursor-pointer" 
+      : !user.patient?.bpjs ? "bg-gray-200 text-gray-500" : "bg-white cursor-pointer text-black"} shadow-lg rounded-2xl`}
     >
       <div className="mt-2 flex justify-center">
         {tipe_pembayaran === "BPJS" ? (
