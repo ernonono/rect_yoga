@@ -43,6 +43,8 @@ function DashboardDoctor() {
     },
   });
 
+  
+
   const mutation = useMutation({
     mutationFn: (form) => instance.post("/registrations", form),
     onSuccess: () => {
@@ -247,6 +249,40 @@ function DashboardDoctor() {
               prefix={<CalendarOutlined />}
             />
           </Card>
+
+          <Card>
+          <Statistic
+              loading={isLoading}
+              title="Total Belum Selesai"
+              precision={0}
+              value={data?.filter((item) => item.status === "Belum Selesai").length}
+              valueStyle={{ color: "#3f8600" }}
+              prefix={<CalendarOutlined />}
+              />
+          </Card>
+
+          <Card>
+          <Statistic
+              loading={isLoading}
+              title="Total Selesai"
+              precision={0}
+              value={data?.filter((item) => item.status === "Selesai").length}
+              valueStyle={{ color: "#3f8600" }}
+              prefix={<CalendarOutlined />}
+              />
+          </Card>
+
+          <Card>
+          <Statistic
+              loading={isLoading}
+              title="Total Dibatalkan"
+              precision={0}
+              value={data?.filter((item) => item.status === "Dibatalkan").length}
+              valueStyle={{ color: "#3f8600" }}
+              prefix={<CalendarOutlined />}
+              />
+          </Card>
+
         </div>
         <Button
           onClick={() => setOpenModalExport(true)}

@@ -34,7 +34,8 @@ function AddRekamMedis() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [params, _] = useSearchParams();
-  const [drugOptions, setDrugOptions] = React.useState([]);
+  const [drugOptions, setDrugOptions] = React.useState([]); // This state is not used, can be removed if not intended for future use.
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["get-detail-registrasi", params.get("registration_id")],
     queryFn: async () => {
@@ -69,12 +70,17 @@ function AddRekamMedis() {
   }
 
   const onFinish = (values) => {
+    // Format the date to YYYY-MM-DD
     values.date = values.date.format("YYYY-MM-DD");
+    // Assign registration and doctor/patient IDs from fetched data
     values.registration_id = data.id;
     values.doctor_id = data.doctor_id;
     values.patient_id = data.patient_id;
+    // Join symptoms array into a comma-separated string
     values.symptomps = values.symptomps.join(",");
+    // Stringify drug_code array for storage (assuming it's an array of objects)
     values.drug_code = JSON.stringify(values.drug_code);
+    // 'dosis' is already a string from the input, so no special handling needed here.
 
     mutation.mutate(values);
   };
@@ -180,6 +186,18 @@ function AddRekamMedis() {
                   ]}
                 >
                   <SearchObat form={form} />
+                </Form.Item>
+
+                {/* New Form.Item for Dosis Obat */}
+                <Form.Item
+                  label="Dosis Obat"
+                  name="dosis"
+                  help="Dosis penggunaan obat"
+                  rules={[
+                    { required: true, message: "Dosis obat tidak boleh kosong" },
+                  ]}
+                >
+                  <Input />
                 </Form.Item>
 
                 <Form.Item

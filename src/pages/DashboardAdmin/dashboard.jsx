@@ -50,12 +50,12 @@ export default function DashboardAdmin() {
         <Card
           loading={isLoading}
           className="cursor-pointer"
-          title="Dokter"
-          onClick={() => navigate("/admin/doctors")}
+          title="Poli"
+          onClick={() => navigate("/admin/poli")}
         >
-          <img src={LogoDokter} alt="doctor" className="mx-auto h-28" />
+          <img src={LogoDokter} alt="poli" className="mx-auto h-28" />
           <p className="text-right">
-            <b>{data?.total_doctor || 0}</b> Dokter
+            <b>{data?.total_poli || 0}</b> Poli
           </p>
         </Card>
       </div>

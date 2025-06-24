@@ -107,30 +107,42 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
           }}
           title="Instruksi Pengambilan Obat"
         >
-          <Card title="Obat" size="small">
-            <List
-              size="small"
-              dataSource={item?.drug_code ? JSON.parse(item.drug_code) : []}
-              renderItem={(item, index) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={<span>{index + 1}</span>}
-                    title={item.name}
-                    description={`Kode Obat: ${item.code}`}
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-          <Card title="Catatan Dokter" className="mt-4" size="small">
-            <Input.TextArea
-              value={item.prescription}
-              rows={7}
-              readOnly
-              variant="borderless"
-              className="w-full"
-            />
-          </Card>
+         <Card title="Obat" size="small">
+  <List
+    size="small"
+    dataSource={item?.drug_code ? JSON.parse(item.drug_code) : []}
+    renderItem={(drug, index) => ( // Changed 'item' to 'drug' for clarity within renderItem
+      <List.Item>
+        <List.Item.Meta
+          avatar={<span>{index + 1}</span>}
+          title={drug.name}
+          description={`Kode Obat: ${drug.code}`}
+        />
+      </List.Item>
+    )}
+  />
+</Card>
+
+{/* Tambahkan Card baru untuk Dosis Obat di sini */}
+<Card title="Dosis Obat" className="mt-4" size="small">
+  <Input.TextArea
+    value={item.dosis || 'Belum ada dosis'} // Display dosis, provide a fallback if null
+    rows={3} // Sesuaikan jumlah baris sesuai kebutuhan
+    readOnly
+    variant="borderless"
+    className="w-full"
+  />
+</Card>
+
+<Card title="Catatan Dokter" className="mt-4" size="small">
+  <Input.TextArea
+    value={item.prescription}
+    rows={7}
+    readOnly
+    variant="borderless"
+    className="w-full"
+  />
+</Card>
         </Modal>
       </Card>
     ),
@@ -145,6 +157,12 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
       label: "Tanggal Check Up",
       children: dayjs(data?.registration?.appointment_date).format(
         "dddd, D MMMM YYYY",
+      ),
+    },
+    {
+      label: "Jam Janji",
+      children: dayjs(data?.registration?.appointment_date).format(
+      "HH:mm"
       ),
     },
     {
@@ -296,6 +314,8 @@ export default function Riwayat() {
                         "dddd, DD MMMM YYYY",
                       )}
                     </p>
+                    <p className="mt-4 font-semibold">Sesi Janji</p>
+                    <p className="text-sm">{dayjs(item?.appointment_date).format("HH:mm")} {/* Format 24 jam */}</p>
                     <p className="mt-4 font-semibold">Poli</p>
                     <p className="text-sm">{item?.doctor?.poli?.name}</p>
                     <p className="mt-2 font-semibold">Dokter</p>
@@ -362,6 +382,8 @@ export default function Riwayat() {
                         "dddd, DD MMMM YYYY",
                       )}
                     </p>
+                    <p className="mt-4 font-semibold">Sesi Janji</p>
+                    <p className="text-sm">{dayjs(item?.appointment_date).format("HH:mm")} {/* Format 24 jam */}</p>
                     <p className="mt-4 font-semibold">Poli</p>
                     <p className="text-sm">{item?.doctor?.poli?.name}</p>
                     <p className="mt-2 font-semibold">Dokter</p>
@@ -421,6 +443,8 @@ export default function Riwayat() {
                         "dddd, DD MMMM YYYY",
                       )}
                     </p>
+                    <p className="mt-4 font-semibold">Sesi Janji</p>
+                    <p className="text-sm">{dayjs(item?.appointment_date).format("HH:mm")} {/* Format 24 jam */}</p>
                     <p className="mt-4 font-semibold">Poli</p>
                     <p className="text-sm">{item?.doctor?.poli?.name}</p>
                     <p className="mt-2 font-semibold">Dokter</p>
