@@ -15,7 +15,7 @@ import {
   Tooltip,
   Typography,
 } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import instance from "../../utils/axios";
 import {
   UserOutlined,
@@ -23,6 +23,7 @@ import {
   FileAddOutlined,
   EditOutlined,
   DeleteOutlined,
+  CloseOutlined,
   FilterOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -65,7 +66,7 @@ const getTagColor = (status) => {
   }
 };
 
-const CardData = ({ data, onClick, onRM, onHistoryRM }) => (
+const CardData = ({ data, onClick, onRM, onHistoryRM, onCancel }) => (
   <div className="bg-white flex flex-col justify-between min-h-[200px] p-5 rounded-lg shadow-md">
     <div className="flex justify-between">
       <div className="flex flex-col justify-center items-center">
@@ -105,16 +106,45 @@ const CardData = ({ data, onClick, onRM, onHistoryRM }) => (
       <Typography.Text className="text-xs">{data.description}</Typography.Text>
     </Card>
 
-    <Button
-      icon={<FileAddOutlined />}
-      onClick={() => onClick(data.id)}
-      block
-      disabled={data?.status === "Dibatalkan"}
-      className="mt-5"
-      type="primary"
-    >
-      Tambah RM
-    </Button>
+    {data?.status === "Belum Selesai" ? (
+      <div className="flex gap-2">
+        <Button
+          icon={<FileAddOutlined />}
+          onClick={() => onClick(data.id)}
+          block
+          size="small"
+          disabled={data?.status === "Dibatalkan"}
+          className="mt-5"
+          type="primary"
+        >
+          Tambah RM
+        </Button>
+        <Button
+          icon={<CloseOutlined />}
+          onClick={() => onCancel(data.id)}
+          block
+          size="small"
+          disabled={data?.status === "Dibatalkan"}
+          className="mt-5 "
+          type="primary"
+          danger
+        >
+          Batalkan
+        </Button>
+      </div>
+    ) : (
+      <Button
+        icon={<FileAddOutlined />}
+        onClick={() => onClick(data.id)}
+        block
+        size="small"
+        disabled={data?.status === "Dibatalkan"}
+        className="mt-5"
+        type="primary"
+      >
+        Tambah RM
+      </Button>
+    )}
 
     <Button
       block
@@ -331,6 +361,7 @@ const MedicalRecordTimeline = ({
 
 function DoctorAppointments() {
   const navigate = useNavigate();
+  const toastId = useRef(null);
   const [params, setParams] = useSearchParams();
   const [registrationId, setRegistrationId] = useState(null);
   const [patientId, setPatientId] = useState(null);
@@ -350,6 +381,18 @@ function DoctorAppointments() {
       return data;
     },
   });
+
+  const handleCancel = async (id) => {
+    if (!window.confirm("Yakin ingin membatalkan pendaftaran ini?")) return;
+    try {
+      const { data } = await instance.delete(`/registrations/${id}`);
+      alert(data.message);
+      refetch();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Gagal membatalkan.");
+    }
+  };
 
   const deleteRM = useMutation({
     mutationFn: (id) => instance.delete(`/medical-records/${id}`),
@@ -391,11 +434,16 @@ function DoctorAppointments() {
       setRegistrationId(params.get("identifier"));
     } else if (params.get("patient_id")) {
       setPatientId(params.get("patient_id"));
+      toastId.current = toast("Mengambil data...", {
+        type: "info",
+        isLoading: true,
+      });
       setRegistrationId(null);
     } else {
       setRegistrationId(null);
       setPatientId(null);
       setDataRM(null);
+      setDataHistoryRM(null);
     }
   }, [params]);
 
@@ -425,6 +473,13 @@ function DoctorAppointments() {
         setDataHistoryRM({
           patient: pasien,
           rm: data,
+        });
+
+        toast.update(toastId.current, {
+          render: "Data berhasil diambil",
+          type: "success",
+          isLoading: false,
+          autoClose: 1500,
         });
       } else {
         setDataHistoryRM(null);
@@ -513,6 +568,7 @@ function DoctorAppointments() {
                       data={item}
                       onRM={handleViewRM}
                       onHistoryRM={handleViewHistoryRM}
+                      onCancel={handleCancel}
                     />
                   ))}
               </div>
@@ -550,7 +606,7 @@ function DoctorAppointments() {
         width={500}
         closable={false}
         onClose={() => setParams({})}
-        open={!!patientId}
+        open={!!dataHistoryRM}
       >
         {dataRM?.length === 0 ? (
           <p>
