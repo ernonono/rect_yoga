@@ -65,7 +65,7 @@ const getTagColor = (status) => {
   }
 };
 
-const CardData = ({ data, onClick, onRM }) => (
+const CardData = ({ data, onClick, onRM, onHistoryRM }) => (
   <div className="bg-white flex flex-col justify-between min-h-[200px] p-5 rounded-lg shadow-md">
     <div className="flex justify-between">
       <div className="flex flex-col justify-center items-center">
@@ -134,6 +134,23 @@ const CardData = ({ data, onClick, onRM }) => (
     >
       Rekam Medis ({data?.medical_records?.length || 0})
     </Button>
+
+    <Button
+      block
+      icon={<FileTextOutlined />}
+      className={`mt-2 bg-blue-600 hover:bg-blue-400 text-white`}
+      type="primary"
+      color="info"
+      onClick={() => {
+        if (!data?.patient?.id) {
+          toast.warning("Tidak ada data pasien untuk rekam medis ini");
+        } else {
+          onHistoryRM(data.patient.id);
+        }
+      }}
+    >
+      Riwayat Rekam Medis
+    </Button>
   </div>
 );
 
@@ -153,7 +170,9 @@ const MedicalRecordTimeline = ({
           <div className="w-full flex justify-between items-center">
             <span>{item.rm_number}</span>
 
-            <div className="flex gap-2">
+            <div
+              className={`flex gap-2 ${data?.registration ? "block" : "hidden"}`}
+            >
               <Tooltip title="Edit Rekam Medis">
                 <Button
                   icon={<EditOutlined />}
@@ -278,15 +297,18 @@ const MedicalRecordTimeline = ({
   const descriptionItems = [
     {
       label: "Nama Pasien",
-      children: data?.registration.patient.name,
+      children: data?.registration?.patient?.name || data?.patient.name || "-",
     },
-    {
+  ];
+
+  if (data?.registration) {
+    descriptionItems.push({
       label: "Tanggal Janji",
       children: dayjs(data?.registration?.appointment_date).format(
         "dddd, D MMMM YYYY",
       ),
-    },
-  ];
+    });
+  }
 
   return (
     <>
@@ -311,7 +333,9 @@ function DoctorAppointments() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [registrationId, setRegistrationId] = useState(null);
+  const [patientId, setPatientId] = useState(null);
   const [dataRM, setDataRM] = useState(null);
+  const [dataHistoryRM, setDataHistoryRM] = useState(null);
   const [filter, setFilter] = useState({
     patient_name: "",
     start_date: "",
@@ -354,6 +378,10 @@ function DoctorAppointments() {
     setParams({ identifier: id });
   };
 
+  const handleViewHistoryRM = (id) => {
+    setParams({ patient_id: id });
+  };
+
   const handleEditRM = (id) => {
     navigate(`/doctor/medical-record/edit-rekam-medis?identifier=${id}`);
   };
@@ -361,8 +389,12 @@ function DoctorAppointments() {
   useEffect(() => {
     if (params.get("identifier")) {
       setRegistrationId(params.get("identifier"));
+    } else if (params.get("patient_id")) {
+      setPatientId(params.get("patient_id"));
+      setRegistrationId(null);
     } else {
       setRegistrationId(null);
+      setPatientId(null);
       setDataRM(null);
     }
   }, [params]);
@@ -380,6 +412,29 @@ function DoctorAppointments() {
       });
     }
   }, [registrationId, data]);
+
+  useEffect(() => {
+    const getHistoryRM = async () => {
+      if (patientId) {
+        const { data } = await instance.get(
+          `/medical-records?patient_id=${patientId}`,
+        );
+
+        const { data: pasien } = await instance.get(`/patients/${patientId}`);
+
+        setDataHistoryRM({
+          patient: pasien,
+          rm: data,
+        });
+      } else {
+        setDataHistoryRM(null);
+      }
+    };
+
+    if (patientId) {
+      getHistoryRM();
+    }
+  }, [patientId]);
 
   const onChangeDate = (value) => {
     if (value) {
@@ -427,7 +482,7 @@ function DoctorAppointments() {
                 end_date: dayjs().format("YYYY-MM-DD"),
               });
             }}
-            type="text" 
+            type="text"
             className="text-xs text-gray-400"
           >
             Data hari ini
@@ -439,31 +494,35 @@ function DoctorAppointments() {
         <SkeletonCards />
       ) : (
         <div className="flex flex-col gap-10">
-        {["Belum Selesai", "Selesai", "Dibatalkan"].map((status) => (
-          <div key={status} className="pb-6 border-b border-gray-500 last:border-none">
-            <Typography.Title level={4} className="text-gray-500">
-              {status}
-            </Typography.Title>
+          {["Belum Selesai", "Selesai", "Dibatalkan"].map((status) => (
+            <div
+              key={status}
+              className="pb-6 border-b border-gray-500 last:border-none"
+            >
+              <Typography.Title level={4} className="text-gray-500">
+                {status}
+              </Typography.Title>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4 mt-2">
-              {data
-                ?.filter((item) => item.status === status)
-                .map((item) => (
-                  <CardData
-                    onClick={handleAddRM}
-                    key={item.id}
-                    data={item}
-                    onRM={handleViewRM}
-                  />
-                ))}
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4 mt-2">
+                {data
+                  ?.filter((item) => item.status === status)
+                  .map((item) => (
+                    <CardData
+                      onClick={handleAddRM}
+                      key={item.id}
+                      data={item}
+                      onRM={handleViewRM}
+                      onHistoryRM={handleViewHistoryRM}
+                    />
+                  ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
 
       <Drawer
-        title="Riwayat Rekam Medis"
+        title="Rekam Medis Janji Temu"
         placement="right"
         width={500}
         closable={false}
@@ -478,6 +537,29 @@ function DoctorAppointments() {
         ) : (
           <MedicalRecordTimeline
             data={dataRM}
+            deleteLoading={deleteRM.isPending}
+            onDelete={deleteRM.mutate}
+            onEdit={handleEditRM}
+          />
+        )}
+      </Drawer>
+
+      <Drawer
+        title="Riwayat Rekam Medis Pasien"
+        placement="right"
+        width={500}
+        closable={false}
+        onClose={() => setParams({})}
+        open={!!patientId}
+      >
+        {dataRM?.length === 0 ? (
+          <p>
+            No medical records found for this patient. Please add medical
+            records.
+          </p>
+        ) : (
+          <MedicalRecordTimeline
+            data={dataHistoryRM}
             deleteLoading={deleteRM.isPending}
             onDelete={deleteRM.mutate}
             onEdit={handleEditRM}
