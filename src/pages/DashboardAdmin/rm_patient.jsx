@@ -31,7 +31,7 @@ const SkeletonCards = () => (
 const CardData = ({ data, onRM }) => (
   <div className="bg-white flex flex-col justify-between min-h-[200px] p-5 rounded-lg shadow-md">
     <div className="flex gap-2 mb-3">
-      <Avatar className="bg-primary" size={200} icon={<UserOutlined />} />
+      <Avatar className="bg-primary" size={100} icon={<UserOutlined />} />
       <div className="flex flex-col ">
         <div>
           <Typography.Title className="m-0" level={4}>
@@ -53,12 +53,6 @@ const CardData = ({ data, onRM }) => (
             <span className="min-w-[100px]">Telfon</span>
             <span>
               : <b>{data?.patient?.phone}</b>
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <span className="min-w-[100px]">Email</span>
-            <span>
-              : <b>{data?.patient?.user?.email}</b>
             </span>
           </div>
         </div>
@@ -108,7 +102,7 @@ function RekamMedisPatient() {
       {isLoading ? (
         <SkeletonCards />
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
           {data?.map((item) => (
             <CardData key={item.id} data={item} onRM={handleViewRM} />
           ))}

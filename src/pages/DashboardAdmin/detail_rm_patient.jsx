@@ -69,51 +69,6 @@ export default function DetailRMPatient() {
         );
       },
     },
-    {
-      title: "DIAGNOSIS",
-      align: "center",
-      key: "diagnosis",
-      dataIndex: "diagnosis",
-      render: (diagnosis) => (
-        <Typography.Text className="font-semibold">{diagnosis}</Typography.Text>
-      ),
-    },
-    {
-      title: "CATATAN DOKTER",
-      align: "center",
-      key: "konsumsi_obat",
-      render: (_, record) => {
-        const resep = record?.prescription?.split("\n");
-
-        return (
-          <div className="flex flex-col">
-            {resep.map((item, index) => (
-              <Typography.Text key={index} className="text-xs font-light">
-                {item}
-              </Typography.Text>
-            ))}
-          </div>
-        );
-      },
-    },
-    {
-      title: "OBAT",
-      align: "center",
-      key: "durg_code",
-      width: "20%",
-      render: (_, record) => {
-        const obat =
-          typeof record?.drug_code === "string"
-            ? JSON.parse(record?.drug_code)
-            : record.drug_code;
-
-        return obat.map((item, index) => (
-          <Tag key={index} color="green" className="font-light text-xs">
-            {item?.name} ({item?.code})
-          </Tag>
-        ));
-      },
-    },
   ];
 
   return !isError ? (
