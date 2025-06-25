@@ -27,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { parseParams } from "../../utils/parseParams";
 import DoctorProfileModal from "../../components/DoctorProfileModal";
 
+
 export function SocialMediaButton({ icon, link }) {
   return (
     <a
@@ -165,7 +166,9 @@ export default function DoctorList() {
     poli_id: "",
     specialty: "",
   });
+
   const [doctorId, setDoctorId] = useState(null);
+  const navigate = useNavigate();
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["doctor-list", filter],
     queryFn: async () => {
@@ -194,6 +197,10 @@ export default function DoctorList() {
       ...filter,
       [property]: value || "",
     });
+  };
+
+  const handleAddDoctorClick = () => { // <-- TAMBAHKAN FUNGSI INI
+    navigate('/admin/doctors/add'); // Sesuaikan dengan path rute AddDoctor Anda
   };
 
   return (
@@ -226,6 +233,13 @@ export default function DoctorList() {
           showSearch
           optionFilterProp="label"
         />
+        <Button
+        type="primary" // Anda bisa mengubah tipe tombol (default, dashed, text, link)
+        onClick={handleAddDoctorClick}
+        className="w-full md:w-auto ml-auto" // ml-auto untuk mendorong tombol ke kanan (opsional)
+      >
+        Tambah Dokter
+      </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

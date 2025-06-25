@@ -16,6 +16,7 @@ import {
   FilterOutlined,
 } from "@ant-design/icons";
 import { parseParams } from "../../utils/parseParams";
+import { useNavigate } from "react-router-dom";
 
 export default function Poli() {
   const [form] = Form.useForm();
@@ -24,6 +25,8 @@ export default function Poli() {
     name: "",
     location: "",
   });
+  const navigate = useNavigate();
+
   const { data, error, refetch, isFetching } = useQuery({
     queryKey: ["poli-list", filter],
     queryFn: async () => {
@@ -38,6 +41,9 @@ export default function Poli() {
       ...filter,
       [property]: value || "",
     });
+  };
+  const handleAddPoliClick = () => {
+    navigate('/admin/add-poli'); // Ganti dengan path yang sesuai untuk halaman tambah poli Anda
   };
 
   const edit = useMutation({
@@ -143,6 +149,13 @@ export default function Poli() {
           className="w-full md:w-1/6"
           allowClear
         />
+        <Button
+          type="primary"
+          onClick={handleAddPoliClick} // Panggil fungsi navigasi saat tombol diklik
+          className="w-full md:w-auto ml-auto" // ml-auto untuk mendorong tombol ke kanan
+        >
+          Tambah Poli
+        </Button>
       </div>
 
       <Table
@@ -182,6 +195,7 @@ export default function Poli() {
             <Input />
           </Form.Item>
         </Form>
+        
       </Modal>
     </div>
   );

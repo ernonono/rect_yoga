@@ -1,4 +1,5 @@
 import {
+  Button,
   Card,
   Descriptions,
   Input,
@@ -125,6 +126,7 @@ export default function PatientList() {
   const [filter, setFilter] = useState({
     name: "",
   });
+  const navigate = useNavigate(); //
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["patient-list", filter],
     queryFn: async () => {
@@ -139,6 +141,10 @@ export default function PatientList() {
       ...filter,
       [property]: value || "",
     });
+  };
+
+  const handleAddPatientClick = () => {
+    navigate('/admin/add-patient'); // Sesuaikan dengan path rute untuk halaman tambah pasien
   };
 
   const descriptionItems = [
@@ -166,8 +172,15 @@ export default function PatientList() {
           className="w-full md:w-1/6"
           allowClear
         />
+      <Button
+          type="primary"
+          onClick={handleAddPatientClick} // Panggil fungsi navigasi saat tombol diklik
+          className="w-full md:w-auto ml-auto" // ml-auto untuk mendorong tombol ke kanan
+        >
+          Tambah Pasien
+        </Button>
       </div>
-
+      
       <div className="grid grid-cols-4 gap-5">
         {isLoading ? (
           <Loading />

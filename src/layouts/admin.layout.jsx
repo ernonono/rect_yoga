@@ -92,11 +92,7 @@ const AdminLayout = () => {
           label: "Semua Doktor",
           onClick: () => navigate("/admin/doctors"),
         },
-        {
-          key: "/admin/doctors/add",
-          label: "Tambah Doktor",
-          onClick: () => navigate("/admin/doctors/add"),
-        },
+        
       ],
     },
 
@@ -110,11 +106,7 @@ const AdminLayout = () => {
           label: "Semua Pasien",
           onClick: () => navigate("/admin/patients"),
         },
-        {
-          key: "/admin/patients/add",
-          label: "Tambah Pasien",
-          onClick: () => navigate("/admin/patients/add"),
-        },
+        
         {
           key: "/admin/patients/medical-records",
           label: "Rekam Medis",
@@ -132,11 +124,7 @@ const AdminLayout = () => {
           label: "Semua Poli",
           onClick: () => navigate("/admin/poli"),
         },
-        {
-          key: "/admin/poli/add",
-          label: "Tambah Poli",
-          onClick: () => navigate("/admin/poli/add"),
-        },
+        
       ],
     },
     {

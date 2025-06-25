@@ -28,6 +28,10 @@ export default function AdminRoutes({}) {
         <Route path="patients" element={<PatientList />} />
         <Route path="patients/add" element={<AddPatient />} />
         <Route path="patients/:id/edit" element={<EditPatient />} />
+        <Route path="add-doctor" element={<AddDoctor />} />
+        <Route path="add-patient" element={<AddPatient />} />
+        <Route path="add-poli" element={<AddPoli />} />
+
         <Route
           path="patients/medical-records"
           element={<RekamMedisPatient />}
