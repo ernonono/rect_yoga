@@ -63,7 +63,7 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
           <div className="flex gap-2">
             <span>:</span>
 
-            {dayjs(item.created_at).format("DD MMMM YYYY HH:mm")}
+            {dayjs(item.created_at).format("DD MMMMYYYY HH:mm")}
           </div>
         </div>
         <div className="flex gap-2 mb-2">
@@ -203,7 +203,7 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
     {
       label: "Tanggal Check Up",
       children: dayjs(data?.registration?.appointment_date).format(
-        "dddd, D MMMM YYYY",
+        "dddd, D MMMMYYYY",
       ),
     },
     {
@@ -229,6 +229,16 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
           {data?.registration?.status}
         </Tag>
       ),
+    },
+    // Menambahkan Nomor Antrian di Drawer Riwayat Medis
+    // Menggunakan data?.registration?.queue_number untuk memastikan tampil jika ada
+    {
+      label: "Nomor Antrian",
+      children:
+        data?.registration?.queue_number !== undefined &&
+        data?.registration?.queue_number !== null
+          ? data.registration.queue_number
+          : "-", // Tampilkan nomor antrian atau '-' jika tidak ada
     },
   ];
 
@@ -264,7 +274,7 @@ export default function Riwayat() {
   const fetchRegistration = async () => {
     try {
       const { data } = await instance.get("/registrations");
-      console.log("Data dari API:", data);
+      console.log("Data dari API:", data); // Penting untuk debugging!
       setDataBelumSelesai(data.belum_selesai);
       setDataSelesai(data.selesai);
       setDataBatal(data.dibatalkan);
@@ -371,13 +381,12 @@ export default function Riwayat() {
                       <p className="font-semibold">Hari</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format(
-                          "dddd, DD MMMM YYYY",
+                          "dddd, DD MMMMYYYY",
                         )}
                       </p>
                       <p className="mt-4 font-semibold">Sesi Janji</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format("HH:mm")}{" "}
-                        {/* Format 24 jam */}
                       </p>
                       <p className="mt-4 font-semibold">Poli</p>
                       <p className="text-sm">{item?.doctor?.poli?.name}</p>
@@ -385,6 +394,14 @@ export default function Riwayat() {
                       <p className="text-sm">{item?.doctor?.name}</p>
                       <p className="mt-2 font-semibold">Status</p>
                       <p className="text-sm">{item?.status}</p>
+                      {/* Pindahkan Nomor Antrian ke SINI, setelah Status */}
+                      {item.queue_number !== undefined &&
+                        item.queue_number !== null && (
+                          <>
+                            <p className="mt-2 font-semibold">Nomor Antrian</p>
+                            <p className="text-sm">#{item.queue_number}</p>
+                          </>
+                        )}
                     </div>
                   </div>
                   <div
@@ -425,13 +442,12 @@ export default function Riwayat() {
                       <p className="font-semibold">Hari</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format(
-                          "dddd, DD MMMM YYYY",
+                          "dddd, DD MMMMYYYY",
                         )}
                       </p>
                       <p className="mt-4 font-semibold">Sesi Janji</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format("HH:mm")}{" "}
-                        {/* Format 24 jam */}
                       </p>
                       <p className="mt-4 font-semibold">Poli</p>
                       <p className="text-sm">{item?.doctor?.poli?.name}</p>
@@ -439,6 +455,14 @@ export default function Riwayat() {
                       <p className="text-sm">{item?.doctor?.name}</p>
                       <p className="mt-2 font-semibold">Status</p>
                       <p className="text-sm">{item?.status}</p>
+                      {/* Pindahkan Nomor Antrian ke SINI, setelah Status */}
+                      {item.queue_number !== undefined &&
+                        item.queue_number !== null && (
+                          <>
+                            <p className="mt-2 font-semibold">Nomor Antrian</p>
+                            <p className="text-sm">#{item.queue_number}</p>
+                          </>
+                        )}
                     </div>
                   </div>
                   <div
@@ -473,13 +497,12 @@ export default function Riwayat() {
                       <p className="font-semibold">Hari</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format(
-                          "dddd, DD MMMM YYYY",
+                          "dddd, DD MMMMYYYY",
                         )}
                       </p>
                       <p className="mt-4 font-semibold">Sesi Janji</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format("HH:mm")}{" "}
-                        {/* Format 24 jam */}
                       </p>
                       <p className="mt-4 font-semibold">Poli</p>
                       <p className="text-sm">{item?.doctor?.poli?.name}</p>
@@ -487,6 +510,14 @@ export default function Riwayat() {
                       <p className="text-sm">{item?.doctor?.name}</p>
                       <p className="mt-2 font-semibold">Status</p>
                       <p className="text-sm">{item?.status}</p>
+                      {/* Pindahkan Nomor Antrian ke SINI, setelah Status */}
+                      {item.queue_number !== undefined &&
+                        item.queue_number !== null && (
+                          <>
+                            <p className="mt-2 font-semibold">Nomor Antrian</p>
+                            <p className="text-sm">#{item.queue_number}</p>
+                          </>
+                        )}
                     </div>
                   </div>
                   <div className="bg-white p-4 w-full border-gray-200 shadow-md">
