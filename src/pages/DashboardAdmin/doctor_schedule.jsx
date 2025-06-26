@@ -8,9 +8,11 @@ import {
   Statistic,
   Tag,
   Typography,
+  DatePicker,
+  Modal,
 } from "antd";
-import React from "react";
-import { CalendarOutlined, DownloadOutlined  } from "@ant-design/icons";
+import React, { useState } from "react";
+import { CalendarOutlined, DownloadOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import dayjs from "dayjs";
@@ -18,6 +20,11 @@ import { useNavigate } from "react-router-dom";
 
 function DoctorSchedule() {
   const navigate = useNavigate();
+
+  const [openModalExport, setOpenModalExport] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ["registrations"],
     queryFn: async () => {
@@ -26,11 +33,32 @@ function DoctorSchedule() {
     },
   });
 
+  const handleDownloadData = async () => {
+    try {
+      const response = await instance.get(
+        `/registrations-summary-schedule?start_date=${startDate}&end_date=${endDate}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "jadwal_dokter.xlsx");
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mendownload file Excel");
+    }
+  };
+
   const getAppointments = (dateObj) => {
     return (
       data?.filter((item) => {
-        const data = dayjs(item.appointment_date).format("DD MMMM YYYY");
-        return data === dayjs(dateObj).format("DD MMMM YYYY");
+        const d = dayjs(item.appointment_date).format("DD MMMM YYYY");
+        return d === dayjs(dateObj).format("DD MMMM YYYY");
       }) || []
     );
   };
@@ -45,7 +73,6 @@ function DoctorSchedule() {
   };
 
   const monthCellRender = (value) => {
-    console.log(value);
     const dataLength = getTotalAppointments(value);
     return dataLength > 0 ? (
       <div className="notes-month">
@@ -56,7 +83,7 @@ function DoctorSchedule() {
   };
 
   const dateCellRender = (value) => {
-    const data = getAppointments(value);
+    const appointments = getAppointments(value);
 
     const Content = ({ data }) => {
       const items = [
@@ -95,7 +122,7 @@ function DoctorSchedule() {
 
     return (
       <div className="events">
-        {data.map((item) => (
+        {appointments.map((item) => (
           <Popover
             key={item.id}
             content={<Content data={item} />}
@@ -104,13 +131,12 @@ function DoctorSchedule() {
             <div
               onClick={() => {
                 if (item.status === "Belum Selesai") return;
-
                 navigate(`/doctor/appointments?identifier=${item.id}`);
               }}
               className="bg-primary px-2 text-white rounded-md"
             >
               <div className="font-bold">
-                {dayjs(item?.appointment_date).format("HH:mm")}
+                {dayjs(item.appointment_date).format("HH:mm")}
               </div>
               <div className="event-name">{item.description}</div>
             </div>
@@ -129,10 +155,10 @@ function DoctorSchedule() {
   return (
     <div>
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
-        JADWAL DOKTOR
+        JADWAL DOKTER
       </Typography.Title>
 
-      <div className="w-full flex justify-between items-center  mb-6">
+      <div className="w-full flex justify-between items-center mb-6">
         <Card className="min-w-[250px]">
           <Statistic
             loading={isLoading}
@@ -146,10 +172,40 @@ function DoctorSchedule() {
         <Button
           type="primary"
           icon={<DownloadOutlined />}
+          onClick={() => setOpenModalExport(true)}
         >
           Download Rekap Data
         </Button>
       </div>
+
+      <Modal
+        title="Download Rekap Data Dokter"
+        open={openModalExport}
+        onCancel={() => setOpenModalExport(false)}
+        footer={
+          <Button
+            type="primary"
+            disabled={!startDate || !endDate}
+            onClick={handleDownloadData}
+          >
+            Download
+          </Button>
+        }
+        width={800}
+        centered
+      >
+        <label className="text-sm font-semibold">Pilih Bulan dan Tahun</label>
+        <DatePicker.RangePicker
+          picker="month"
+          className="w-full mt-1"
+          format="MM YYYY"
+          onChange={(dates) => {
+            setEndDate(dates?.[1]?.endOf('day').format("YYYY-MM-DD HH:mm:ss"));
+            setStartDate(dates?.[0]?.startOf('day').format("YYYY-MM-DD HH:mm:ss"));
+
+          }}
+        />
+      </Modal>
 
       {isLoading ? <Skeleton active /> : <Calendar cellRender={cellRender} />}
     </div>
