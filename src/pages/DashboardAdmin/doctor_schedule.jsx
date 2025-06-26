@@ -1,4 +1,5 @@
 import {
+  Button,
   Calendar,
   Card,
   Descriptions,
@@ -9,7 +10,7 @@ import {
   Typography,
 } from "antd";
 import React from "react";
-import { CalendarOutlined } from "@ant-design/icons";
+import { CalendarOutlined, DownloadOutlined  } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import dayjs from "dayjs";
@@ -131,7 +132,7 @@ function DoctorSchedule() {
         JADWAL DOKTOR
       </Typography.Title>
 
-      <div className="w-full flex justify-start items-center gap-7 mb-6">
+      <div className="w-full flex justify-between items-center  mb-6">
         <Card className="min-w-[250px]">
           <Statistic
             loading={isLoading}
@@ -142,6 +143,12 @@ function DoctorSchedule() {
             prefix={<CalendarOutlined />}
           />
         </Card>
+        <Button
+          type="primary"
+          icon={<DownloadOutlined />}
+        >
+          Download Rekap Data
+        </Button>
       </div>
 
       {isLoading ? <Skeleton active /> : <Calendar cellRender={cellRender} />}
