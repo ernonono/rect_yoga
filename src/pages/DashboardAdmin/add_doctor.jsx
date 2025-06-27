@@ -8,24 +8,31 @@ import {
   Space,
   Typography,
   Upload,
-  message,
 } from "antd";
 import dayjs from "dayjs";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react"; // Tambahkan useState
 import {
   InboxOutlined,
   MinusCircleOutlined,
   PlusOutlined,
+  ArrowLeftOutlined,
+  DeleteOutlined, // Tambahkan DeleteOutlined
 } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const { Dragger } = Upload;
 
 export default function AddDoctor() {
   const [form] = Form.useForm();
-  const [image, setImage] = React.useState(null);
+  const [image, setImage] = useState(null); // State untuk file gambar
+  const [imageUrl, setImageUrl] = useState(null); // State untuk preview gambar
+  const [suratIzin, setSuratIzin] = useState(null); // State untuk file surat izin
+  const [suratIzinUrl, setSuratIzinUrl] = useState(null); // State untuk preview surat izin (URL objek)
+
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
     queryKey: ["poli-list"],
@@ -35,25 +42,21 @@ export default function AddDoctor() {
     },
   });
 
-  const uploadProps = {
-    name: "file",
-    showUploadList: false,
-    action: null,
-    onChange(info) {
-      setImage(info.file.originFileObj);
-    },
-  };
-
   const mutation = useMutation({
     mutationFn: (body) =>
-      instance.post("doctors", body, {
+      instance.post("/doctors", body, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "multipart/form-data", // Penting untuk FormData
         },
       }),
     onSuccess: (res) => {
       toast.success("Berhasil menambahkan dokter");
       form.resetFields();
+      setImage(null); // Reset state gambar
+      setImageUrl(null); // Reset preview gambar
+      setSuratIzin(null); // Reset state surat izin
+      setSuratIzinUrl(null); // Reset preview surat izin
+      navigate("/admin/doctors");
     },
 
     onError: (error) => {
@@ -66,16 +69,37 @@ export default function AddDoctor() {
     },
   });
 
-  useEffect(() => {
-    form.setFieldsValue({
-      quota: [
-        {
-          day: "Senin",
-          quota: 10,
-        },
-      ],
-    });
-  }, []);
+  // Props untuk Upload Komponen Foto Profil
+  const uploadImageProps = {
+    name: "image",
+    showUploadList: false,
+    beforeUpload: (file) => {
+      setImage(file);
+      setImageUrl(URL.createObjectURL(file));
+      return false; // Mencegah Ant Design mengupload secara otomatis
+    },
+    onRemove: () => {
+      setImage(null);
+      setImageUrl(null);
+      return true;
+    },
+  };
+
+  // Props untuk Upload Komponen Surat Izin
+  const uploadSuratIzinProps = {
+    name: "surat_izin",
+    showUploadList: false,
+    beforeUpload: (file) => {
+      setSuratIzin(file);
+      setSuratIzinUrl(URL.createObjectURL(file));
+      return false; // Mencegah Ant Design mengupload secara otomatis
+    },
+    onRemove: () => {
+      setSuratIzin(null);
+      setSuratIzinUrl(null);
+      return true;
+    },
+  };
 
   const profesiOptions = [
     {
@@ -129,46 +153,49 @@ export default function AddDoctor() {
   const onFinish = (values) => {
     const fd = new FormData();
 
-    const objectKeys = Object.keys(values);
+    // Append all form values
+    for (const key in values) {
+      if (Object.prototype.hasOwnProperty.call(values, key)) {
+        let value = values[key];
 
-    if (values.education?.length > 0) {
-      values.education = values.education.map((item) => ({
-        ...item,
-        start_year: dayjs(item.start_year).format("YYYY"),
-        end_year: dayjs(item.end_year).format("YYYY"),
-      }));
+        // Handle DatePicker values
+        if (dayjs.isDayjs(value)) {
+          value = value.format("YYYY-MM-DD");
+        }
+
+        // Handle nested JSON fields (education, actions)
+        if (key === "education" || key === "actions") {
+          if (Array.isArray(value)) {
+            if (key === "education") {
+              value = value.map((item) => ({
+                ...item,
+                start_year: dayjs.isDayjs(item.start_year)
+                  ? item.start_year.format("YYYY")
+                  : item.start_year,
+                end_year: dayjs.isDayjs(item.end_year)
+                  ? item.end_year.format("YYYY")
+                  : item.end_year,
+              }));
+            }
+            fd.append(key, JSON.stringify(value));
+          } else if (value) {
+            fd.append(key, value);
+          }
+        } else if (value !== null && value !== undefined) {
+          fd.append(key, value);
+        }
+      }
     }
 
-    objectKeys.forEach((key) => {
-      switch (key) {
-        case "image":
-          if (values[key]) {
-            fd.append(key, image);
-          }
+    // Append image file if present
+    if (image) {
+      fd.append("image", image);
+    }
 
-          break;
-        case "birthdate":
-          fd.append(key, dayjs(values[key]).format("YYYY-MM-DD"));
-          break;
-        case "education":
-          if (values[key]) {
-            fd.append(key, JSON.stringify(values[key]));
-          }
-
-          break;
-        case "actions":
-          if (values[key]) {
-            fd.append(key, JSON.stringify(values[key]));
-          }
-          break;
-        default:
-          if (values[key]) {
-            fd.append(key, values[key]);
-          }
-
-          break;
-      }
-    });
+    // Append surat_izin file if present
+    if (suratIzin) {
+      fd.append("surat_izin", suratIzin);
+    }
 
     mutation.mutate(fd);
   };
@@ -182,10 +209,20 @@ export default function AddDoctor() {
 
   return (
     <>
-      <Typography.Title className="text-[#767676] tracking-tight" level={2}>
-        TAMBAH DOKTOR
-      </Typography.Title>
+      <div className="flex items-center gap-3 mb-3">
+        <Button
+          onClick={() => navigate("/admin/doctosr")}
+          icon={<ArrowLeftOutlined />}
+        />
+        <Typography.Title
+          className="text-[#767676] tracking-tight m-0"
+          level={2}
+        >
+          TAMBAH DOKTER
+        </Typography.Title>
+      </div>
       <Form
+        scrollToFirstError
         onFinish={onFinish}
         form={form}
         layout="vertical"
@@ -258,16 +295,18 @@ export default function AddDoctor() {
           >
             <Input.Password />
           </Form.Item>
-          <Form.Item
-            label="Foto Profil"
-            name="image"
-            className="md:w-7/12 w-full"
-          >
-            <Dragger {...uploadProps}>
+          <Form.Item label="Foto Profil" className="md:w-7/12 w-full">
+            <Dragger {...uploadImageProps}>
               {image ? (
                 <img
                   className="w-full h-48 object-contain"
                   src={URL.createObjectURL(image)}
+                  alt="profil"
+                />
+              ) : imageUrl ? ( // Tambahkan ini jika Anda ingin tetap menampilkan preview setelah reset
+                <img
+                  className="w-full h-48 object-contain"
+                  src={imageUrl}
                   alt="profil"
                 />
               ) : (
@@ -277,6 +316,83 @@ export default function AddDoctor() {
                   </p>
                   <p className="ant-upload-text">
                     Klik atau tarik file ke area ini untuk mengunggah
+                  </p>
+                </>
+              )}
+            </Dragger>
+          </Form.Item>
+
+          {/* New Field for Surat Izin */}
+          <Form.Item label="Surat Izin" className="md:w-7/12 w-full">
+            <Dragger {...uploadSuratIzinProps}>
+              {suratIzin ? (
+                <>
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">
+                    File terpilih: {suratIzin.name}
+                  </p>
+                  <p className="ant-upload-hint">
+                    {suratIzin.type.startsWith("image/") ? (
+                      <img
+                        className="w-full h-48 object-contain"
+                        src={URL.createObjectURL(suratIzin)}
+                        alt="surat izin preview"
+                      />
+                    ) : suratIzin.type === "application/pdf" ? (
+                      // Untuk PDF, gunakan <embed> atau link download
+                      // Catatan: <embed> mungkin tidak berfungsi di semua browser
+                      <embed
+                        src={URL.createObjectURL(suratIzin)}
+                        type="application/pdf"
+                        width="100%"
+                        height="200px"
+                      />
+                    ) : (
+                      <span>Pratinjau tidak tersedia untuk jenis file ini.</span>
+                    )}
+                  </p>
+                </>
+              ) : suratIzinUrl ? ( // Tambahkan ini jika Anda ingin tetap menampilkan preview setelah reset
+                <>
+                  {suratIzinUrl.endsWith(".pdf") ? (
+                    <embed
+                      src={suratIzinUrl}
+                      type="application/pdf"
+                      width="100%"
+                      height="200px"
+                    />
+                  ) : (
+                    <img
+                      className="w-full h-48 object-contain mb-2"
+                      src={suratIzinUrl}
+                      alt="surat izin preview"
+                    />
+                  )}
+                  <p className="ant-upload-text">
+                    File terunggah: {suratIzinUrl.split("/").pop()}
+                  </p>
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      uploadSuratIzinProps.onRemove();
+                    }}
+                  >
+                    Hapus Surat Izin
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">
+                    Klik atau tarik file ke area ini untuk mengunggah Surat
+                    Izin (PDF/Gambar)
                   </p>
                 </>
               )}
@@ -314,13 +430,6 @@ export default function AddDoctor() {
             />
           </Form.Item>
           <Form.Item
-            label="Tentang Dokter"
-            name="about"
-            className="md:w-7/12 w-full"
-          >
-            <Input.TextArea rows={4} />
-          </Form.Item>
-          <Form.Item
             label="Profesi"
             name="profession"
             className="md:w-7/12 w-full"
@@ -330,6 +439,13 @@ export default function AddDoctor() {
               optionFilterProp="label"
               options={profesiOptions}
             />
+          </Form.Item>
+          <Form.Item
+            label="Tentang Dokter"
+            name="about"
+            className="md:w-7/12 w-full"
+          >
+            <Input.TextArea rows={4} />
           </Form.Item>
           <Form.Item
             label="Spesialisasi Dokter"
@@ -498,6 +614,13 @@ export default function AddDoctor() {
               loading={mutation.isPending}
               type="default"
               htmlType="reset"
+              onClick={() => {
+                form.resetFields();
+                setImage(null);
+                setImageUrl(null);
+                setSuratIzin(null);
+                setSuratIzinUrl(null);
+              }}
             >
               Reset
             </Button>

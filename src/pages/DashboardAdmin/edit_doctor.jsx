@@ -8,16 +8,17 @@ import {
   Space,
   Typography,
   Upload,
-  message,
 } from "antd";
 import dayjs from "dayjs";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   InboxOutlined,
   MinusCircleOutlined,
   PlusOutlined,
+  ArrowLeftOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
@@ -26,203 +27,207 @@ const { Dragger } = Upload;
 
 export default function EditDoctor() {
   const [form] = Form.useForm();
-  const [image, setImage] = React.useState(null);
-  const [imageUrl, setImageUrl] = React.useState(null);
   const { id } = useParams();
+  const [image, setImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [suratIzin, setSuratIzin] = useState(null);
+  const [suratIzinUrl, setSuratIzinUrl] = useState(null);
+
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["poli-list"],
     queryFn: async () => {
       const { data } = await instance.get("/polis");
-
       return data;
     },
   });
 
-  const { data: dataDoctor, isLoading: loadingDoctor } = useQuery({
+  // Query untuk mengambil data dokter yang akan diedit
+  const {
+    data: dataDoctor,
+    isLoading: loadingDoctor,
+    refetch: refetchDoctor, // Tambahkan refetch di sini
+  } = useQuery({
     queryKey: ["doctor", id],
     queryFn: async () => {
       const { data } = await instance.get(`doctors/${id}`);
-
       return data;
     },
+    enabled: !!id,
+    // Agar data tidak di-cache terlalu lama dan selalu fresh setelah edit
+    staleTime: 0,
+    gcTime: 0,
   });
 
   useEffect(() => {
     if (dataDoctor) {
-      const data = dataDoctor;
+      const doctor = dataDoctor;
+
       const education =
-        typeof data?.education === "string"
-          ? JSON.parse(data.education)
-          : data?.education || [];
-      // set form values
+        typeof doctor?.education === "string" && doctor.education
+          ? JSON.parse(doctor.education)
+          : doctor?.education || [];
+
+      const actions =
+        typeof doctor?.actions === "string" && doctor.actions
+          ? JSON.parse(doctor.actions)
+          : doctor?.actions || [];
+
       form.setFieldsValue({
-        ...data,
-        birthdate: data?.birthdate ? dayjs(data.birthdate) : dayjs(),
-        email: data.user.email,
-        actions:
-          typeof data?.actions === "string"
-            ? JSON.parse(data.actions)
-            : data?.actions || [],
+        ...doctor,
+        birthdate: doctor?.birthdate ? dayjs(doctor.birthdate) : null,
+        actions: actions,
         education: education.map((item) => ({
           ...item,
-          start_year: dayjs(item.start_year),
-          end_year: dayjs(item.end_year),
+          start_year: item.start_year ? dayjs(String(item.start_year)) : null,
+          end_year: item.end_year ? dayjs(String(item.end_year)) : null,
         })),
       });
 
-      if (data.image) {
-        const url = `http://localhost:8000/doctor_image/${data.image}`;
+      if (doctor.image) {
+        const url = `http://localhost:8000/doctor_image/${doctor.image}`;
         setImageUrl(url);
+      } else {
+        setImageUrl(null);
+      }
+
+      if (doctor.surat_izin) {
+        const url = `http://localhost:8000/doctor_izin/${doctor.surat_izin}`;
+        setSuratIzinUrl(url);
+      } else {
+        setSuratIzinUrl(null);
       }
     }
-  }, [dataDoctor]);
+  }, [dataDoctor, form]);
 
-  console.log(form.getFieldsValue());
-
-  const uploadProps = {
-    name: "file",
+  const uploadImageProps = {
+    name: "image",
     showUploadList: false,
-    action: null,
-    onChange(info) {
+    beforeUpload: (file) => {
+      setImage(file);
+      setImageUrl(URL.createObjectURL(file));
+      form.setFieldsValue({ image_removed: false });
+      return false;
+    },
+    onRemove: () => {
+      setImage(null);
       setImageUrl(null);
-      setImage(info.file.originFileObj);
+      form.setFieldsValue({ image_removed: true });
+      return true;
+    },
+  };
+
+  const uploadSuratIzinProps = {
+    name: "surat_izin",
+    showUploadList: false,
+    beforeUpload: (file) => {
+      setSuratIzin(file);
+      setSuratIzinUrl(URL.createObjectURL(file));
+      form.setFieldsValue({ surat_izin_removed: false });
+      return false;
+    },
+    onRemove: () => {
+      setSuratIzin(null);
+      setSuratIzinUrl(null);
+      form.setFieldsValue({ surat_izin_removed: true });
+      return true;
     },
   };
 
   const mutation = useMutation({
-    mutationFn: (body) => instance.put(`doctors/${id}`, body),
+    mutationFn: (body) =>
+      instance.post(`/doctors/${id}`, body, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }),
     onSuccess: (res) => {
-      toast.success("Berhasil mengubah dokter dokter");
-      form.resetFields();
-      navigate("/admin/doctors");
+      toast.success("Berhasil mengubah dokter");
+      queryClient.invalidateQueries({ queryKey: ["doctors-list"] }); // Invalidate daftar dokter
+      refetchDoctor(); // PENTING: Memuat ulang data dokter yang sedang diedit
+      // navigate("/admin/doctor"); // BARIS INI DIHAPUS/DIKOMENTARI
     },
 
     onError: (error) => {
-      console.log(error);
+      console.error("Mutasi gagal:", error.response || error.message || error);
       toast.error(
         error?.response?.data?.message ||
           error?.response?.data ||
-          "Gagal menambahkan dokter",
+          "Gagal mengubah dokter",
       );
     },
   });
 
   const profesiOptions = [
-    {
-      label: "Dokter Umum",
-      value: "Dokter Umum",
-    },
-    {
-      label: "Dokter Spesialis",
-      value: "Dokter Spesialis",
-    },
-    {
-      label: "Dokter Gigi",
-      value: "Dokter Gigi",
-    },
+    { label: "Dokter Umum", value: "Dokter Umum" },
+    { label: "Dokter Spesialis", value: "Dokter Spesialis" },
+    { label: "Dokter Gigi", value: "Dokter Gigi" },
   ];
 
   const specialtyOptions = [
-    {
-      label: "Spesialis Anak",
-      value: "Spesialis Anak",
-    },
-    {
-      label: "Spesialis Bedah",
-      value: "Spesialis Bedah",
-    },
-    {
-      label: "Spesialis Gigi",
-      value: "Spesialis Gigi",
-    },
+    { label: "Spesialis Anak", value: "Spesialis Anak" },
+    { label: "Spesialis Bedah", value: "Spesialis Bedah" },
+    { label: "Spesialis Gigi", value: "Spesialis Gigi" },
   ];
 
   const actionsOptions = [
-    {
-      label: "Konsultasi",
-      value: "Konsultasi",
-    },
-    {
-      label: "Operasi",
-      value: "Operasi",
-    },
-    {
-      label: "Pemeriksaan",
-      value: "Pemeriksaan",
-    },
-    {
-      label: "Cek Kesehatan",
-      value: "Cek Kesehatan",
-    },
+    { label: "Konsultasi", value: "Konsultasi" },
+    { label: "Operasi", value: "Operasi" },
+    { label: "Pemeriksaan", value: "Pemeriksaan" },
+    { label: "Cek Kesehatan", value: "Cek Kesehatan" },
   ];
 
   const onFinish = (values) => {
-    if (values.education?.length > 0) {
-      values.education = values.education.map((item) => ({
-        ...item,
-        start_year: dayjs(item.start_year).format("YYYY"),
-        end_year: dayjs(item.end_year).format("YYYY"),
-      }));
+    const fd = new FormData();
+
+    for (const key in values) {
+      if (Object.prototype.hasOwnProperty.call(values, key)) {
+        let value = values[key];
+
+        if (dayjs.isDayjs(value)) {
+          value = value.format("YYYY-MM-DD");
+        }
+
+        if (key === "education" || key === "actions") {
+          if (Array.isArray(value)) {
+            if (key === "education") {
+              value = value.map((item) => ({
+                ...item,
+                start_year: dayjs.isDayjs(item.start_year)
+                  ? item.start_year.format("YYYY")
+                  : item.start_year,
+                end_year: dayjs.isDayjs(item.end_year)
+                  ? item.end_year.format("YYYY")
+                  : item.end_year,
+              }));
+            }
+            fd.append(key, JSON.stringify(value));
+          } else if (value) {
+            fd.append(key, value);
+          }
+        } else if (value !== null && value !== undefined) {
+          fd.append(key, value);
+        }
+      }
     }
-
-    // objectKeys.forEach((key) => {
-    //   switch (key) {
-    //     case "image":
-    //       if (image) {
-    //         fd.append(key, image);
-    //       }
-
-    //       break;
-    //     case "birthdate":
-    //       fd.append(key, dayjs(values[key]).format("YYYY-MM-DD"));
-    //       break;
-    //     case "education":
-    //       if (values[key]) {
-    //         fd.append(key, JSON.stringify(values[key]));
-    //       }
-
-    //       break;
-    //     case "actions":
-    //       if (values[key]) {
-    //         fd.append(key, JSON.stringify(values[key]));
-    //       }
-    //       break;
-    //     default:
-    //       if (values[key]) {
-    //         fd.append(key, values[key]);
-    //       }
-
-    //       break;
-    //   }
-    // });
-
-    values.birthdate = dayjs(values.birthdate).format("YYYY-MM-DD");
-    values.education = values.education
-      ? JSON.stringify(values.education)
-      : null;
-    values.actions = values.actions ? JSON.stringify(values.actions) : null;
 
     if (image) {
-      // handle upload later
-      const fd = new FormData();
-
-      fd.append("doctor_id", id);
       fd.append("image", image);
-
-      instance
-        .post("/doctors/upload-image", fd, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((res) => {
-          console.log("hasil upload", res);
-        });
+    } else if (imageUrl === null && dataDoctor?.image) {
+      fd.append("image_removed", "true");
     }
 
-    mutation.mutate(values);
+    if (suratIzin) {
+      fd.append("surat_izin", suratIzin);
+    } else if (suratIzinUrl === null && dataDoctor?.surat_izin) {
+      fd.append("surat_izin_removed", "true");
+    }
+
+    fd.append("_method", "PUT");
+
+    mutation.mutate(fd);
   };
 
   const required = [
@@ -234,9 +239,18 @@ export default function EditDoctor() {
 
   return (
     <>
-      <Typography.Title className="text-[#767676] tracking-tight" level={2}>
-        EDIT DOKTOR
-      </Typography.Title>
+      <div className="flex items-center gap-3 mb-3">
+        <Button
+          onClick={() => navigate("/admin/doctor")}
+          icon={<ArrowLeftOutlined />}
+        />
+        <Typography.Title
+          className="text-[#767676] tracking-tight m-0"
+          level={2}
+        >
+          EDIT DOKTER
+        </Typography.Title>
+      </div>
       <Form
         scrollToFirstError
         onFinish={onFinish}
@@ -246,9 +260,7 @@ export default function EditDoctor() {
       >
         <Card
           loading={loadingDoctor}
-          style={{
-            border: "1px solid #E8E8E8",
-          }}
+          style={{ border: "1px solid #E8E8E8" }}
           styles={{
             header: {
               backgroundColor: "#F5F5F5",
@@ -305,15 +317,14 @@ export default function EditDoctor() {
             <Input type="email" />
           </Form.Item>
           <Form.Item
-            // rules={required}
-            label="Password"
+            label="Password (Biarkan kosong jika tidak ingin mengubah)"
             name="password"
             className="md:w-7/12 w-full"
           >
             <Input.Password />
           </Form.Item>
           <Form.Item label="Foto Profil" className="md:w-7/12 w-full">
-            <Dragger {...uploadProps}>
+            <Dragger {...uploadImageProps}>
               {image ? (
                 <img
                   className="w-full h-48 object-contain"
@@ -321,11 +332,24 @@ export default function EditDoctor() {
                   alt="profil"
                 />
               ) : imageUrl ? (
-                <img
-                  className="w-full h-48 object-contain"
-                  src={imageUrl}
-                  alt="profil"
-                />
+                <>
+                  <img
+                    className="w-full h-48 object-contain mb-2"
+                    src={imageUrl}
+                    alt="profil"
+                  />
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      uploadImageProps.onRemove();
+                    }}
+                  >
+                    Hapus Foto
+                  </Button>
+                </>
               ) : (
                 <>
                   <p className="ant-upload-drag-icon">
@@ -338,13 +362,85 @@ export default function EditDoctor() {
               )}
             </Dragger>
           </Form.Item>
+
+          <Form.Item label="Surat Izin" className="md:w-7/12 w-full">
+            <Dragger {...uploadSuratIzinProps}>
+              {suratIzin ? (
+                <>
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">
+                    File terpilih: {suratIzin.name}
+                  </p>
+                  <p className="ant-upload-hint">
+                    {suratIzin.type.startsWith("image/") ? (
+                      <img
+                        className="w-full h-48 object-contain"
+                        src={URL.createObjectURL(suratIzin)}
+                        alt="surat izin preview"
+                      />
+                    ) : suratIzin.type === "application/pdf" ? (
+                      <embed
+                        src={URL.createObjectURL(suratIzin)}
+                        type="application/pdf"
+                        width="100%"
+                        height="200px"
+                      />
+                    ) : (
+                      <span>Pratinjau tidak tersedia untuk jenis file ini.</span>
+                    )}
+                  </p>
+                </>
+              ) : suratIzinUrl ? (
+                <>
+                  {suratIzinUrl.endsWith(".pdf") ? (
+                    <embed
+                      src={suratIzinUrl}
+                      type="application/pdf"
+                      width="100%"
+                      height="200px"
+                    />
+                  ) : (
+                    <img
+                      className="w-full h-48 object-contain mb-2"
+                      src={suratIzinUrl}
+                      alt="surat izin preview"
+                    />
+                  )}
+                  <p className="ant-upload-text">
+                    File terunggah: {suratIzinUrl.split("/").pop()}
+                  </p>
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      uploadSuratIzinProps.onRemove();
+                    }}
+                  >
+                    Hapus Surat Izin
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">
+                    Klik atau tarik file ke area ini untuk mengunggah Surat
+                    Izin (PDF/Gambar)
+                  </p>
+                </>
+              )}
+            </Dragger>
+          </Form.Item>
         </Card>
 
         <Card
           loading={loadingDoctor}
-          style={{
-            border: "1px solid #E8E8E8",
-          }}
+          style={{ border: "1px solid #E8E8E8" }}
           styles={{
             header: {
               backgroundColor: "#F5F5F5",
@@ -418,20 +514,11 @@ export default function EditDoctor() {
               options={actionsOptions}
             />
           </Form.Item>
-          <Form.Item
-            label="Kuota Pasien"
-            name="quota"
-            className="md:w-7/12 w-full"
-          >
-            <Input type="number" />
-          </Form.Item>
         </Card>
 
         <Card
           loading={loadingDoctor}
-          style={{
-            border: "1px solid #E8E8E8",
-          }}
+          style={{ border: "1px solid #E8E8E8" }}
           styles={{
             header: {
               backgroundColor: "#F5F5F5",
@@ -447,10 +534,7 @@ export default function EditDoctor() {
                 {fields.map(({ key, name, ...restField }) => (
                   <Space
                     key={key}
-                    style={{
-                      display: "flex",
-                      marginBottom: 8,
-                    }}
+                    style={{ display: "flex", marginBottom: 8 }}
                     align="baseline"
                   >
                     <Form.Item
@@ -510,9 +594,7 @@ export default function EditDoctor() {
 
         <Card
           loading={loadingDoctor}
-          style={{
-            border: "1px solid #E8E8E8",
-          }}
+          style={{ border: "1px solid #E8E8E8" }}
           styles={{
             header: {
               backgroundColor: "#F5F5F5",
@@ -564,6 +646,47 @@ export default function EditDoctor() {
               loading={mutation.isPending}
               type="default"
               htmlType="reset"
+              onClick={() => {
+                // Reset form dan state preview ke kondisi awal dari dataDoctor
+                if (dataDoctor) {
+                  const doctor = dataDoctor;
+                  form.setFieldsValue({
+                    ...doctor,
+                    birthdate: doctor?.birthdate ? dayjs(doctor.birthdate) : null,
+                    actions: typeof doctor?.actions === "string" ? JSON.parse(doctor.actions) : doctor?.actions || [],
+                    education: typeof doctor?.education === "string" ? JSON.parse(doctor.education).map((item) => ({
+                      ...item,
+                      start_year: item.start_year ? dayjs(String(item.start_year)) : null,
+                      end_year: item.end_year ? dayjs(String(item.end_year)) : null,
+                    })) : doctor?.education.map((item) => ({
+                      ...item,
+                      start_year: item.start_year ? dayjs(String(item.start_year)) : null,
+                      end_year: item.end_year ? dayjs(String(item.end_year)) : null,
+                    })) || [],
+                  });
+                  if (doctor.image) {
+                    setImageUrl(`http://localhost:8000/doctor_image/${doctor.image}`);
+                    setImage(null); // Penting: Hapus file lokal jika reset ke yang dari server
+                  } else {
+                    setImageUrl(null);
+                    setImage(null);
+                  }
+                  if (doctor.surat_izin) {
+                    setSuratIzinUrl(`http://localhost:8000/doctor_izin/${doctor.surat_izin}`);
+                    setSuratIzin(null); // Penting: Hapus file lokal jika reset ke yang dari server
+                  } else {
+                    setSuratIzinUrl(null);
+                    setSuratIzin(null);
+                  }
+                } else {
+                    // Jika dataDoctor belum ada (misal halaman dimuat ulang dan data belum fetch)
+                    form.resetFields();
+                    setImage(null);
+                    setImageUrl(null);
+                    setSuratIzin(null);
+                    setSuratIzinUrl(null);
+                }
+              }}
             >
               Reset
             </Button>
