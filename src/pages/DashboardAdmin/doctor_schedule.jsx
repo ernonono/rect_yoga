@@ -17,13 +17,17 @@ import { useQuery } from "@tanstack/react-query";
 import instance from "../../utils/axios";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function DoctorSchedule() {
   const navigate = useNavigate();
+  const toastId = React.useRef(null);
 
   const [openModalExport, setOpenModalExport] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  const [pending, setPending] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["registrations"],
@@ -35,6 +39,10 @@ function DoctorSchedule() {
 
   const handleDownloadData = async () => {
     try {
+      toastId.current = toast("Mengumpulkan data...", {
+        type: "info",
+        isLoading: true,
+      });
       const response = await instance.get("/registrations-summary-schedule", {
         responseType: "blob",
         params: {
@@ -42,15 +50,34 @@ function DoctorSchedule() {
           end_date: endDate,
         },
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", "jadwal_dokter.xlsx");
       document.body.appendChild(link);
       link.click();
+
+      toast.update(toastId.current, {
+        render: "File Excel berhasil didownload",
+        type: "success",
+        isLoading: false,
+
+        autoClose: 1500,
+      });
+
+      setPending(false);
     } catch (error) {
       console.error(error);
+      setPending(false);
+      toast.update(toastId.current, {
+        render:
+          error?.response?.data?.message || "Gagal mendownload file Excel",
+        type: "error",
+        isLoading: false,
+        autoClose: 1500,
+      });
+
       alert("Gagal mendownload file Excel");
     }
   };
@@ -193,6 +220,10 @@ function DoctorSchedule() {
           </Button>
         }
         width={800}
+        okButtonProps={{
+          loading: pending,
+          disabled: !startDate || !endDate,
+        }}
         centered
       >
         <label className="text-sm font-semibold">Pilih Bulan dan Tahun</label>
@@ -201,9 +232,10 @@ function DoctorSchedule() {
           className="w-full mt-1"
           format="MM YYYY"
           onChange={(dates) => {
-            setEndDate(dates?.[1]?.endOf('day').format("YYYY-MM-DD HH:mm:ss"));
-            setStartDate(dates?.[0]?.startOf('day').format("YYYY-MM-DD HH:mm:ss"));
-
+            setEndDate(dates?.[1]?.endOf("day").format("YYYY-MM-DD HH:mm:ss"));
+            setStartDate(
+              dates?.[0]?.startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+            );
           }}
         />
       </Modal>

@@ -29,6 +29,7 @@ import { formatDate } from "../halaman/konfirmasi";
 
 function DashboardDoctor() {
   const [form] = Form.useForm();
+  const toastId = React.useRef(null);
   const loggedinDoktor = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -42,8 +43,6 @@ function DashboardDoctor() {
       return data;
     },
   });
-
-  
 
   const mutation = useMutation({
     mutationFn: (form) => instance.post("/registrations", form),
@@ -203,6 +202,11 @@ function DashboardDoctor() {
 
   const handleDownloadData = async () => {
     try {
+      toastId.current = toast("Mengumpulkan data...", {
+        type: "info",
+        isLoading: true,
+      });
+
       const response = await instance.get(
         `/registrations-summary?start_date=${startDate}&end_date=${endDate}&doctor_id=${loggedinDoktor.doctor_id}`,
         {
@@ -216,6 +220,13 @@ function DashboardDoctor() {
       link.setAttribute("download", "rekap_data_pasien.xlsx");
       document.body.appendChild(link);
       link.click();
+
+      toast.update(toastId.current, {
+        render: "File Excel berhasil didownload",
+        type: "success",
+        isLoading: false,
+        autoClose: 1500,
+      });
     } catch (error) {
       toast.error("Gagal mendownload data pasien");
     }
@@ -251,38 +262,41 @@ function DashboardDoctor() {
           </Card>
 
           <Card>
-          <Statistic
+            <Statistic
               loading={isLoading}
               title="Total Belum Selesai"
               precision={0}
-              value={data?.filter((item) => item.status === "Belum Selesai").length}
+              value={
+                data?.filter((item) => item.status === "Belum Selesai").length
+              }
               valueStyle={{ color: "#3f8600" }}
               prefix={<CalendarOutlined />}
-              />
+            />
           </Card>
 
           <Card>
-          <Statistic
+            <Statistic
               loading={isLoading}
               title="Total Selesai"
               precision={0}
               value={data?.filter((item) => item.status === "Selesai").length}
               valueStyle={{ color: "#3f8600" }}
               prefix={<CalendarOutlined />}
-              />
+            />
           </Card>
 
           <Card>
-          <Statistic
+            <Statistic
               loading={isLoading}
               title="Total Dibatalkan"
               precision={0}
-              value={data?.filter((item) => item.status === "Dibatalkan").length}
+              value={
+                data?.filter((item) => item.status === "Dibatalkan").length
+              }
               valueStyle={{ color: "#3f8600" }}
               prefix={<CalendarOutlined />}
-              />
+            />
           </Card>
-
         </div>
         <Button
           onClick={() => setOpenModalExport(true)}

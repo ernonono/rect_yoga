@@ -71,7 +71,6 @@ export default function EditProfileDoctor() {
           ? JSON.parse(doctor.actions)
           : doctor?.actions || [];
 
-
       // Set form values
       form.setFieldsValue({
         ...doctor,
@@ -86,7 +85,7 @@ export default function EditProfileDoctor() {
       });
 
       // Set image preview
-      if (doctor.image) {
+      if (doctor?.image) {
         const url = `http://localhost:8000/doctor_image/${doctor.image}`;
         setImageUrl(url);
       } else {
@@ -94,14 +93,14 @@ export default function EditProfileDoctor() {
       }
 
       // Set surat izin preview
-      if (doctor.surat_izin) {
+      if (doctor?.surat_izin) {
         const url = `http://localhost:8000/doctor_izin/${doctor.surat_izin}`; // Sesuaikan path jika berbeda
         setSuratIzinUrl(url);
       } else {
         setSuratIzinUrl(null); // Pastikan null jika tidak ada surat izin
       }
     }
-  }, [dataDoctor, form]); // Tambahkan form sebagai dependency agar effect jalan saat form ready
+  }, [dataDoctor]); // Tambahkan form sebagai dependency agar effect jalan saat form ready
 
   // Props untuk Upload Komponen Foto Profil
   const uploadImageProps = {
@@ -113,7 +112,8 @@ export default function EditProfileDoctor() {
       form.setFieldsValue({ image_removed: false }); // Reset flag jika upload baru
       return false; // Mencegah Ant Design mengupload secara otomatis
     },
-    onRemove: () => { // Menangani penghapusan gambar yang sudah ada
+    onRemove: () => {
+      // Menangani penghapusan gambar yang sudah ada
       setImage(null);
       setImageUrl(null);
       form.setFieldsValue({ image_removed: true }); // Set flag untuk memberitahu backend bahwa gambar dihapus
@@ -131,7 +131,8 @@ export default function EditProfileDoctor() {
       form.setFieldsValue({ surat_izin_removed: false }); // Reset flag jika upload baru
       return false; // Mencegah Ant Design mengupload secara otomatis
     },
-    onRemove: () => { // Menangani penghapusan surat izin yang sudah ada
+    onRemove: () => {
+      // Menangani penghapusan surat izin yang sudah ada
       setSuratIzin(null);
       setSuratIzinUrl(null);
       form.setFieldsValue({ surat_izin_removed: true }); // Set flag
@@ -139,13 +140,14 @@ export default function EditProfileDoctor() {
     },
   };
 
-
   const mutation = useMutation({
-    mutationFn: (body) => instance.post(`users/update-profile`, body, { // Gunakan POST untuk FormData
+    mutationFn: (body) =>
+      instance.post(`users/update-profile`, body, {
+        // Gunakan POST untuk FormData
         headers: {
-            'Content-Type': 'multipart/form-data', // Penting untuk FormData
+          "Content-Type": "multipart/form-data", // Penting untuk FormData
         },
-    }),
+      }),
     onSuccess: (res) => {
       toast.success("Berhasil mengubah profil");
       // Invalidate queries agar data terbaru diambil kembali dari server
@@ -194,23 +196,27 @@ export default function EditProfileDoctor() {
         if (dayjs.isDayjs(value)) {
           value = value.format("YYYY-MM-DD");
         }
-        
+
         // Handle nested JSON fields (education, actions)
-        if (key === 'education' || key === 'actions') {
-            if (Array.isArray(value)) {
-                // Konversi tahun dayjs di education menjadi string
-                if (key === 'education') {
-                    value = value.map(item => ({
-                        ...item,
-                        start_year: dayjs.isDayjs(item.start_year) ? item.start_year.format("YYYY") : item.start_year,
-                        end_year: dayjs.isDayjs(item.end_year) ? item.end_year.format("YYYY") : item.end_year,
-                    }));
-                }
-                fd.append(key, JSON.stringify(value));
-            } else if (value) {
-                // If it's already a string JSON (from initial form values), just append it
-                fd.append(key, value);
+        if (key === "education" || key === "actions") {
+          if (Array.isArray(value)) {
+            // Konversi tahun dayjs di education menjadi string
+            if (key === "education") {
+              value = value.map((item) => ({
+                ...item,
+                start_year: dayjs.isDayjs(item.start_year)
+                  ? item.start_year.format("YYYY")
+                  : item.start_year,
+                end_year: dayjs.isDayjs(item.end_year)
+                  ? item.end_year.format("YYYY")
+                  : item.end_year,
+              }));
             }
+            fd.append(key, JSON.stringify(value));
+          } else if (value) {
+            // If it's already a string JSON (from initial form values), just append it
+            fd.append(key, value);
+          }
         } else if (value !== null && value !== undefined) {
           fd.append(key, value);
         }
@@ -220,19 +226,21 @@ export default function EditProfileDoctor() {
     // Append image file if present
     if (image) {
       fd.append("image", image);
-    } else if (imageUrl === null && dataDoctor?.doctor?.image) { // Jika gambar dihapus dari form dan sebelumnya ada
+    } else if (imageUrl === null && dataDoctor?.doctor?.image) {
+      // Jika gambar dihapus dari form dan sebelumnya ada
       fd.append("image_removed", "true");
     }
 
     // Append surat_izin file if present
     if (suratIzin) {
       fd.append("surat_izin", suratIzin);
-    } else if (suratIzinUrl === null && dataDoctor?.doctor?.surat_izin) { // Jika surat izin dihapus dari form dan sebelumnya ada
+    } else if (suratIzinUrl === null && dataDoctor?.doctor?.surat_izin) {
+      // Jika surat izin dihapus dari form dan sebelumnya ada
       fd.append("surat_izin_removed", "true");
     }
 
     // Penting: _method PUT untuk Laravel saat pakai FormData
-    fd.append('_method', 'PUT');
+    fd.append("_method", "PUT");
 
     mutation.mutate(fd);
   };
@@ -384,21 +392,28 @@ export default function EditProfileDoctor() {
                     File terpilih: {suratIzin.name}
                   </p>
                   <p className="ant-upload-hint">
-                    {suratIzin.type.startsWith('image/') ? (
+                    {suratIzin.type.startsWith("image/") ? (
                       <img
                         className="w-full h-48 object-contain"
                         src={URL.createObjectURL(suratIzin)}
                         alt="surat izin preview"
                       />
                     ) : (
-                      <span>Pratinjau tidak tersedia untuk jenis file ini.</span>
+                      <span>
+                        Pratinjau tidak tersedia untuk jenis file ini.
+                      </span>
                     )}
                   </p>
                 </>
               ) : suratIzinUrl ? (
                 <>
-                  {suratIzinUrl.endsWith('.pdf') ? (
-                    <embed src={suratIzinUrl} type="application/pdf" width="100%" height="200px" />
+                  {suratIzinUrl.endsWith(".pdf") ? (
+                    <embed
+                      src={suratIzinUrl}
+                      type="application/pdf"
+                      width="100%"
+                      height="200px"
+                    />
                   ) : (
                     <img
                       className="w-full h-48 object-contain mb-2"
@@ -407,7 +422,7 @@ export default function EditProfileDoctor() {
                     />
                   )}
                   <p className="ant-upload-text">
-                    File terunggah: {suratIzinUrl.split('/').pop()}
+                    File terunggah: {suratIzinUrl.split("/").pop()}
                   </p>
                   <Button
                     type="text"
@@ -427,7 +442,8 @@ export default function EditProfileDoctor() {
                     <InboxOutlined />
                   </p>
                   <p className="ant-upload-text">
-                    Klik atau tarik file ke area ini untuk mengunggah Surat Izin (PDF/Gambar)
+                    Klik atau tarik file ke area ini untuk mengunggah Surat Izin
+                    (PDF/Gambar)
                   </p>
                 </>
               )}
@@ -663,24 +679,44 @@ export default function EditProfileDoctor() {
                   const doctor = dataDoctor.doctor;
                   form.setFieldsValue({
                     ...doctor,
-                    birthdate: doctor?.birthdate ? dayjs(doctor.birthdate) : null,
+                    birthdate: doctor?.birthdate
+                      ? dayjs(doctor.birthdate)
+                      : null,
                     email: dataDoctor.email,
-                    actions: typeof doctor?.actions === "string" ? JSON.parse(doctor.actions) : doctor?.actions || [],
-                    education: typeof doctor?.education === "string" ? JSON.parse(doctor.education).map((item) => ({
-                      ...item,
-                      start_year: item.start_year ? dayjs(String(item.start_year)) : null,
-                      end_year: item.end_year ? dayjs(String(item.end_year)) : null,
-                    })) : doctor?.education.map((item) => ({
-                      ...item,
-                      start_year: item.start_year ? dayjs(String(item.start_year)) : null,
-                      end_year: item.end_year ? dayjs(String(item.end_year)) : null,
-                    })) || [],
+                    actions:
+                      typeof doctor?.actions === "string"
+                        ? JSON.parse(doctor.actions)
+                        : doctor?.actions || [],
+                    education:
+                      typeof doctor?.education === "string"
+                        ? JSON.parse(doctor.education).map((item) => ({
+                            ...item,
+                            start_year: item.start_year
+                              ? dayjs(String(item.start_year))
+                              : null,
+                            end_year: item.end_year
+                              ? dayjs(String(item.end_year))
+                              : null,
+                          }))
+                        : doctor?.education.map((item) => ({
+                            ...item,
+                            start_year: item.start_year
+                              ? dayjs(String(item.start_year))
+                              : null,
+                            end_year: item.end_year
+                              ? dayjs(String(item.end_year))
+                              : null,
+                          })) || [],
                   });
                   if (doctor.image) {
-                    setImageUrl(`http://localhost:8000/doctor_image/${doctor.image}`);
+                    setImageUrl(
+                      `http://localhost:8000/doctor_image/${doctor.image}`,
+                    );
                   }
                   if (doctor.surat_izin) {
-                    setSuratIzinUrl(`http://localhost:8000/doctor_izin/${doctor.surat_izin}`);
+                    setSuratIzinUrl(
+                      `http://localhost:8000/doctor_izin/${doctor.surat_izin}`,
+                    );
                   }
                 }
               }}
