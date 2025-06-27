@@ -350,7 +350,9 @@ export default function AddDoctor() {
                         height="200px"
                       />
                     ) : (
-                      <span>Pratinjau tidak tersedia untuk jenis file ini.</span>
+                      <span>
+                        Pratinjau tidak tersedia untuk jenis file ini.
+                      </span>
                     )}
                   </p>
                 </>
@@ -391,8 +393,8 @@ export default function AddDoctor() {
                     <InboxOutlined />
                   </p>
                   <p className="ant-upload-text">
-                    Klik atau tarik file ke area ini untuk mengunggah Surat
-                    Izin (PDF/Gambar)
+                    Klik atau tarik file ke area ini untuk mengunggah Surat Izin
+                    (PDF/Gambar)
                   </p>
                 </>
               )}
@@ -476,6 +478,13 @@ export default function AddDoctor() {
               optionFilterProp="label"
               options={actionsOptions}
             />
+          </Form.Item>
+          <Form.Item
+            label="Kuota Pasien"
+            name="quota"
+            className="md:w-7/12 w-full"
+          >
+            <Input type="number" />
           </Form.Item>
         </Card>
 

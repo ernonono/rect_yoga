@@ -529,6 +529,13 @@ export default function EditProfileDoctor() {
               options={actionsOptions}
             />
           </Form.Item>
+          <Form.Item
+            label="Kuota Pasien"
+            name="quota"
+            className="md:w-7/12 w-full"
+          >
+            <Input type="number" />
+          </Form.Item>
         </Card>
 
         <Card

@@ -388,7 +388,9 @@ export default function EditDoctor() {
                         height="200px"
                       />
                     ) : (
-                      <span>Pratinjau tidak tersedia untuk jenis file ini.</span>
+                      <span>
+                        Pratinjau tidak tersedia untuk jenis file ini.
+                      </span>
                     )}
                   </p>
                 </>
@@ -429,8 +431,8 @@ export default function EditDoctor() {
                     <InboxOutlined />
                   </p>
                   <p className="ant-upload-text">
-                    Klik atau tarik file ke area ini untuk mengunggah Surat
-                    Izin (PDF/Gambar)
+                    Klik atau tarik file ke area ini untuk mengunggah Surat Izin
+                    (PDF/Gambar)
                   </p>
                 </>
               )}
@@ -513,6 +515,13 @@ export default function EditDoctor() {
               optionFilterProp="label"
               options={actionsOptions}
             />
+          </Form.Item>
+          <Form.Item
+            label="Kuota Pasien"
+            name="quota"
+            className="md:w-7/12 w-full"
+          >
+            <Input type="number" />
           </Form.Item>
         </Card>
 
@@ -652,39 +661,59 @@ export default function EditDoctor() {
                   const doctor = dataDoctor;
                   form.setFieldsValue({
                     ...doctor,
-                    birthdate: doctor?.birthdate ? dayjs(doctor.birthdate) : null,
-                    actions: typeof doctor?.actions === "string" ? JSON.parse(doctor.actions) : doctor?.actions || [],
-                    education: typeof doctor?.education === "string" ? JSON.parse(doctor.education).map((item) => ({
-                      ...item,
-                      start_year: item.start_year ? dayjs(String(item.start_year)) : null,
-                      end_year: item.end_year ? dayjs(String(item.end_year)) : null,
-                    })) : doctor?.education.map((item) => ({
-                      ...item,
-                      start_year: item.start_year ? dayjs(String(item.start_year)) : null,
-                      end_year: item.end_year ? dayjs(String(item.end_year)) : null,
-                    })) || [],
+                    birthdate: doctor?.birthdate
+                      ? dayjs(doctor.birthdate)
+                      : null,
+                    actions:
+                      typeof doctor?.actions === "string"
+                        ? JSON.parse(doctor.actions)
+                        : doctor?.actions || [],
+                    education:
+                      typeof doctor?.education === "string"
+                        ? JSON.parse(doctor.education).map((item) => ({
+                            ...item,
+                            start_year: item.start_year
+                              ? dayjs(String(item.start_year))
+                              : null,
+                            end_year: item.end_year
+                              ? dayjs(String(item.end_year))
+                              : null,
+                          }))
+                        : doctor?.education.map((item) => ({
+                            ...item,
+                            start_year: item.start_year
+                              ? dayjs(String(item.start_year))
+                              : null,
+                            end_year: item.end_year
+                              ? dayjs(String(item.end_year))
+                              : null,
+                          })) || [],
                   });
                   if (doctor.image) {
-                    setImageUrl(`http://localhost:8000/doctor_image/${doctor.image}`);
+                    setImageUrl(
+                      `http://localhost:8000/doctor_image/${doctor.image}`,
+                    );
                     setImage(null); // Penting: Hapus file lokal jika reset ke yang dari server
                   } else {
                     setImageUrl(null);
                     setImage(null);
                   }
                   if (doctor.surat_izin) {
-                    setSuratIzinUrl(`http://localhost:8000/doctor_izin/${doctor.surat_izin}`);
+                    setSuratIzinUrl(
+                      `http://localhost:8000/doctor_izin/${doctor.surat_izin}`,
+                    );
                     setSuratIzin(null); // Penting: Hapus file lokal jika reset ke yang dari server
                   } else {
                     setSuratIzinUrl(null);
                     setSuratIzin(null);
                   }
                 } else {
-                    // Jika dataDoctor belum ada (misal halaman dimuat ulang dan data belum fetch)
-                    form.resetFields();
-                    setImage(null);
-                    setImageUrl(null);
-                    setSuratIzin(null);
-                    setSuratIzinUrl(null);
+                  // Jika dataDoctor belum ada (misal halaman dimuat ulang dan data belum fetch)
+                  form.resetFields();
+                  setImage(null);
+                  setImageUrl(null);
+                  setSuratIzin(null);
+                  setSuratIzinUrl(null);
                 }
               }}
             >
