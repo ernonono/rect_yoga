@@ -295,7 +295,7 @@ export default function EditProfileDoctor() {
           >
             <Input />
           </Form.Item>
-          <Form.Item label="NIK" name="nik" className="md:w-7/12 w-full">
+          <Form.Item label="Nomor Str" name="nik" className="md:w-7/12 w-full">
             <Input />
           </Form.Item>
           <Form.Item
@@ -381,7 +381,7 @@ export default function EditProfileDoctor() {
           </Form.Item>
 
           {/* New Field for Surat Izin */}
-          <Form.Item label="Surat Izin" className="md:w-7/12 w-full">
+          <Form.Item label="File Str" className="md:w-7/12 w-full">
             <Dragger {...uploadSuratIzinProps}>
               {suratIzin ? (
                 <>
