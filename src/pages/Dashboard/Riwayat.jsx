@@ -381,7 +381,7 @@ export default function Riwayat() {
                       <p className="font-semibold">Hari</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format(
-                          "dddd, DD MMMMYYYY",
+                          "dddd, DD MMMM YYYY",
                         )}
                       </p>
                       <p className="mt-4 font-semibold">Sesi Janji</p>
@@ -442,7 +442,7 @@ export default function Riwayat() {
                       <p className="font-semibold">Hari</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format(
-                          "dddd, DD MMMMYYYY",
+                          "dddd, DD MMMM YYYY",
                         )}
                       </p>
                       <p className="mt-4 font-semibold">Sesi Janji</p>
@@ -497,7 +497,7 @@ export default function Riwayat() {
                       <p className="font-semibold">Hari</p>
                       <p className="text-sm">
                         {dayjs(item?.appointment_date).format(
-                          "dddd, DD MMMMYYYY",
+                          "dddd, DD MMMM YYYY",
                         )}
                       </p>
                       <p className="mt-4 font-semibold">Sesi Janji</p>
