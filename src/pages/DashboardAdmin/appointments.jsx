@@ -144,31 +144,7 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
               ))}
             </ul>
           </div>
-        </div>
-
-        <div className="flex gap-2 mb-2">
-          <span className="font-semibold min-w-[60px]">Diagnosa</span>
-          <div className="flex gap-2">
-            <span>:</span>
-            <Typography.Text>{item.diagnosis}</Typography.Text>
-          </div>
-        </div>
-
-        <Button
-          className="mt-2"
-          icon={<FileTextOutlined />}
-          type="primary"
-          onClick={() => {
-            setOpen((prev) => {
-              const newOpen = [...prev];
-              newOpen[idx] = true;
-              return newOpen;
-            });
-          }}
-          size="small"
-        >
-          Pengambilan Obat
-        </Button>
+        </div>        
 
         <Modal
           width={800}
