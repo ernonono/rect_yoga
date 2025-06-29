@@ -558,7 +558,7 @@ function DoctorAppointments() {
                 {status}
               </Typography.Title>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4 mt-2">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-5 mt-2">
                 {data
                   ?.filter((item) => item.status === status)
                   .map((item) => (
