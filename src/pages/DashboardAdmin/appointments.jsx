@@ -515,7 +515,7 @@ function AppointmentDoctor() {
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
           {data?.map((item) => (
             <CardData
               onClick={handleAddRM}
