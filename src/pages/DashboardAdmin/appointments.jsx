@@ -454,9 +454,6 @@ function AppointmentDoctor() {
         open={openModalExport}
         onCancel={() => setOpenModalExport(false)}
         footer={[
-          <Button key="back" onClick={() => setOpenModalExport(false)}>
-            Batal
-          </Button>,
           <Button
             key="submit"
             type="primary"
