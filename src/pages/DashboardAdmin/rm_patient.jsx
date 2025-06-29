@@ -96,7 +96,7 @@ function RekamMedisPatient() {
   return (
     <div>
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
-        REKAM MEDIS PASIEN
+        RIWAYAT PELAYANAN PASIEN
       </Typography.Title>
 
       {isLoading ? (
