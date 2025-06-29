@@ -1,4 +1,7 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery
+} from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -9,23 +12,34 @@ import {
   Empty,
   Input,
   List,
-  Modal,
+  Modal, // Pastikan Modal sudah terimport
   Select,
   Skeleton,
   Timeline,
   Typography,
 } from "antd";
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState
+} from "react";
 import instance from "../../utils/axios";
 import {
   UserOutlined,
   FileTextOutlined,
   FilterOutlined,
+  DownloadOutlined, // Tambahkan DownloadOutlined
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { toast } from "react-toastify";
-import { parseParams } from "../../utils/parseParams";
+import {
+  useNavigate,
+  useSearchParams
+} from "react-router-dom";
+import {
+  toast
+} from "react-toastify";
+import {
+  parseParams
+} from "../../utils/parseParams";
 import debounce from "lodash/debounce";
 
 const abbreviate = (name) => {
@@ -37,11 +51,16 @@ const abbreviate = (name) => {
   return `${firstName} ${lastNames.join(".")}`;
 };
 
-export const SkeletonCards = ({ noGrid = false }) =>
+export const SkeletonCards = ({
+  noGrid = false
+}) =>
   noGrid ? (
     [1, 2, 3, 4, 5].map((item) => (
       <Skeleton.Node
-        style={{ width: "100%", height: 200 }}
+        style={{
+          width: "100%",
+          height: 200
+        }}
         active
         children={false}
         key={item}
@@ -51,7 +70,10 @@ export const SkeletonCards = ({ noGrid = false }) =>
     <div className={"grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"}>
       {[1, 2, 3, 4, 5].map((item) => (
         <Skeleton.Node
-          style={{ width: "100%", height: 200 }}
+          style={{
+            width: "100%",
+            height: 200
+          }}
           active
           children={false}
           key={item}
@@ -60,7 +82,11 @@ export const SkeletonCards = ({ noGrid = false }) =>
     </div>
   );
 
-const CardData = ({ data, onClick, onRM }) => (
+const CardData = ({
+  data,
+  onClick,
+  onRM
+}) => (
   <div className="bg-white flex flex-col justify-between min-h-[200px] p-5 rounded-lg shadow-md">
     <div className="flex justify-between">
       <div className="flex flex-col justify-center items-center">
@@ -80,15 +106,17 @@ const CardData = ({ data, onClick, onRM }) => (
       </div>
     </div>
 
-    {/* <Button
-      icon={<FileAddOutlined />}
-      onClick={() => onClick(data.id)}
-      block
-      className="mt-5"
-      type="primary"
-    >
-      Tambah RM
-    </Button> */}
+    {
+      /* <Button
+          icon={<FileAddOutlined />}
+          onClick={() => onClick(data.id)}
+          block
+          className="mt-5"
+          type="primary"
+        >
+          Tambah RM
+        </Button> */
+    }
 
     <Button
       block
@@ -110,7 +138,12 @@ const CardData = ({ data, onClick, onRM }) => (
   </div>
 );
 
-const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
+const MedicalRecordTimeline = ({
+  data,
+  onDelete,
+  onEdit,
+  deleteLoading
+}) => {
   const [open, setOpen] = useState([data?.rm?.map(() => false)]);
   const items = data?.rm?.map((item, idx) => ({
     children: (
@@ -144,12 +177,16 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
               ))}
             </ul>
           </div>
-        </div>        
+        </div>
 
         <Modal
           width={800}
           okText="Tutup"
-          cancelButtonProps={{ style: { display: "none" } }}
+          cancelButtonProps={{
+            style: {
+              display: "none"
+            }
+          }}
           open={open[idx]}
           onOk={() => {
             setOpen((prev) => {
@@ -196,18 +233,15 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
     ),
   }));
 
-  const descriptionItems = [
-    {
-      label: "Nama Pasien",
-      children: data?.registration.patient.name,
-    },
-    {
-      label: "Tanggal Check Up",
-      children: dayjs(data?.registration?.appointment_date).format(
-        "dddd, D MMMM YYYY",
-      ),
-    },
-  ];
+  const descriptionItems = [{
+    label: "Nama Pasien",
+    children: data?.registration.patient.name,
+  }, {
+    label: "Tanggal Check Up",
+    children: dayjs(data?.registration?.appointment_date).format(
+      "dddd, D MMMM YYYY",
+    ),
+  }, ];
 
   return (
     <>
@@ -226,6 +260,12 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
 function AppointmentDoctor() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  const toastId = React.useRef(null);
+  const [openModalExport, setOpenModalExport] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [pending, setPending] = useState(false);
+
   const [filter, setFilter] = useState({
     patient_name: "",
     poli_id: "",
@@ -234,20 +274,31 @@ function AppointmentDoctor() {
   });
   const [registrationId, setRegistrationId] = useState(null);
   const [dataRM, setDataRM] = useState(null);
-  const { data, isLoading, refetch } = useQuery({
+  const {
+    data,
+    isLoading,
+    refetch
+  } = useQuery({
     queryKey: ["doctor-appointments", filter],
     queryFn: async () => {
-      const { data } = await instance.get(
+      const {
+        data
+      } = await instance.get(
         `/registrations?${parseParams(filter)}`,
       );
       return data;
     },
   });
 
-  const { data: polis, isLoading: poliLoading } = useQuery({
+  const {
+    data: polis,
+    isLoading: poliLoading
+  } = useQuery({
     queryKey: ["polis"],
     queryFn: async () => {
-      const { data } = await instance.get("/polis");
+      const {
+        data
+      } = await instance.get("/polis");
 
       const options = data.map((item) => ({
         label: item.name,
@@ -269,8 +320,7 @@ function AppointmentDoctor() {
 
     onError: (error) => {
       toast.error(
-        error?.response?.data?.message || "Gagal menghapus rekam medis",
-        {
+        error?.response?.data?.message || "Gagal menghapus rekam medis", {
           position: "top-left",
         },
       );
@@ -282,7 +332,9 @@ function AppointmentDoctor() {
   };
 
   const handleViewRM = (id) => {
-    setParams({ identifier: id });
+    setParams({
+      identifier: id
+    });
   };
 
   const handleEditRM = (id) => {
@@ -313,7 +365,9 @@ function AppointmentDoctor() {
   }, [registrationId, data]);
 
   const onChangePoli = (value) =>
-    setFilter({ ...filter, poli_id: value || "" });
+    setFilter({ ...filter,
+      poli_id: value || ""
+    });
   const onChangeDate = (value) => {
     if (value) {
       setFilter({
@@ -329,13 +383,105 @@ function AppointmentDoctor() {
       });
     }
   };
-  const onSearchName = (v) => setFilter({ ...filter, patient_name: v || "" });
+  const onSearchName = (v) => setFilter({ ...filter,
+    patient_name: v || ""
+  });
+
+  // FUNGSI BARU UNTUK MENGUNDUH DATA
+  const handleDownloadData = async () => {
+    try {
+      toastId.current = toast("Mengumpulkan data...", {
+        type: "info",
+        isLoading: true,
+      });
+      const response = await instance.get("/registrations-summary-schedule", {
+        responseType: "blob",
+        params: {
+          start_date: startDate,
+          end_date: endDate,
+        },
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "rekap_janji_pasien.xlsx"); // Nama file yang akan didownload
+      document.body.appendChild(link);
+      link.click();
+
+      toast.update(toastId.current, {
+        render: "File Excel berhasil didownload",
+        type: "success",
+        isLoading: false,
+        autoClose: 1500,
+      });
+
+      setPending(false); // Nonaktifkan status loading
+      setOpenModalExport(false); // Tutup modal setelah berhasil
+    } catch (error) {
+      console.error(error);
+      setPending(false); // Nonaktifkan status loading jika ada error
+      toast.update(toastId.current, {
+        render:
+          error?.response?.data?.message || "Gagal mendownload file Excel",
+        type: "error",
+        isLoading: false,
+        autoClose: 1500,
+      });
+    }
+  };
 
   return (
     <div>
       <Typography.Title className="text-[#767676] tracking-tight" level={2}>
         JADWAL JANJI
       </Typography.Title>
+
+      {/* Tombol Download Rekap Data */}
+      <div className="w-full flex justify-end items-center mb-6">
+        <Button
+          type="primary"
+          icon={<DownloadOutlined />}
+          onClick={() => setOpenModalExport(true)}
+        >
+          Download Rekap Data
+        </Button>
+      </div>
+
+      {/* Modal Download Rekap Data */}
+      <Modal
+        title="Download Rekap Data Janji Pasien"
+        open={openModalExport}
+        onCancel={() => setOpenModalExport(false)}
+        footer={[
+          <Button key="back" onClick={() => setOpenModalExport(false)}>
+            Batal
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            disabled={!startDate || !endDate || pending} // Nonaktifkan jika tanggal belum dipilih atau sedang loading
+            onClick={handleDownloadData}
+            loading={pending} // Menampilkan loading state pada tombol
+          >
+            Download
+          </Button>,
+        ]}
+        width={800}
+        centered
+      >
+        <label className="text-sm font-semibold">Pilih Periode Bulan dan Tahun</label>
+        <DatePicker.RangePicker
+          picker="month" // Mengizinkan pemilihan bulan dan tahun
+          className="w-full mt-1"
+          format="MMMM YYYY" // Format tampilan bulan dan tahun
+          onChange={(dates) => {
+            // Pastikan Anda mendapatkan awal dan akhir bulan dengan benar
+            setStartDate(dates?.[0]?.startOf("month").format("YYYY-MM-DD HH:mm:ss"));
+            setEndDate(dates?.[1]?.endOf("month").format("YYYY-MM-DD HH:mm:ss"));
+          }}
+        />
+      </Modal>
 
       <div className="flex mb-3 bg-[#F5F5F5] py-3 rounded-md px-4 flex-col md:flex-row items-center gap-2">
         <FilterOutlined className="text-xl text-[#767676] mr-2" />
