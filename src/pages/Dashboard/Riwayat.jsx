@@ -39,7 +39,7 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
 
     const pdf = new jsPDF({
       unit: "in",
-      format: [14, 10], // A4 size in inches (14in x 10in)
+      format: [10, 8,5], // A4 size in inches (14in x 10in)
     });
     pdf.addImage(imgData, "PNG", 0.1, 0.1); // A4 size in mm
     pdf.save(
@@ -142,8 +142,21 @@ const MedicalRecordTimeline = ({ data, onDelete, onEdit, deleteLoading }) => {
         >
           <div className="border p-5" id="capture">
             <p className="text-lg text-center mb-2">Pengambilan Obat</p>
-            <Card title={<p className="pb-2">Obat</p>} size="small">
+            <Card title={<p className="pb-2">Dokter</p>}
+              className="mt-4"
+              size="small"
+            >
+              <Input.TextArea
+                value={data?.registration?.doctor?.name || 'Nama Dokter Tidak Tersedia'} // Menggunakan data?.registration?.doctor?.name
+                rows={1} // Cukup satu baris untuk nama dokter
+                readOnly
+                variant="borderless"
+                className="w-full text-center font-semibold" // Menjadikan nama dokter di tengah dan tebal
+              />
+            </Card>
+            <Card title={<p className="pb-2">Obat</p>} size="small" className="mt-4">
               <List
+              className="mt-4"
                 size="small"
                 dataSource={item?.drug_code ? JSON.parse(item.drug_code) : []}
                 renderItem={(
